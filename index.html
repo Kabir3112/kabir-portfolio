@@ -66,33 +66,46 @@
 
     <!-- ───────────────────────────────────────────────
          SECTION 2 · NAME + ABOUT + PROFILE
+         Two-column: text left, full-height photo right
     ─────────────────────────────────────────────── -->
     <section id="intro-about" class="panel" data-theme="dark" style="z-index:2">
-      <div class="panel-inner intro-about-inner" id="aboutPanelInner">
+      <div class="about-layout">
 
-        <div class="intro-name-block">
-          <p class="intro-greeting">Hi, I'm</p>
-          <h1 class="intro-name" aria-label="Kabir Mehta">
-            <span class="name-line" id="nameLine1">Kabir</span>
-            <span class="name-line" id="nameLine2">Mehta.</span>
-          </h1>
-          <svg class="name-underline" viewBox="0 0 320 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path id="underline-path" d="M4 18 C 60 4, 160 28, 316 10" stroke="var(--green-light)" stroke-width="2.5" stroke-linecap="round" fill="none" pathLength="1"/>
-          </svg>
+        <!-- Left: all text content -->
+        <div class="about-content" id="aboutPanelInner">
+
+          <div class="intro-name-block">
+            <p class="intro-greeting">Hi, I'm</p>
+            <h1 class="intro-name" aria-label="Kabir Mehta">
+              <span class="name-line" id="nameLine1">Kabir</span>
+              <span class="name-line" id="nameLine2">Mehta.</span>
+            </h1>
+            <svg class="name-underline" viewBox="0 0 320 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path id="underline-path" d="M4 18 C 60 4, 160 28, 316 10" stroke="var(--green-light)" stroke-width="2.5" stroke-linecap="round" fill="none" pathLength="1"/>
+            </svg>
+          </div>
+
+          <p class="intro-subtitle" id="introSubtitle">
+            MSc · King's College London · Ex-FinIQ · AI Curious
+          </p>
+          <p class="intro-about-para" id="introAboutPara">
+            FinTech consultant turned AI-curious researcher. I spent two years at FinIQ delivering structured products for global banks, then moved to London to explore the intersection of technology and management at King's. Currently writing a dissertation on how AI is reshaping authority inside organisations — and genuinely fascinated by where it's all heading.
+          </p>
+
+          <!-- 10-second loading bar → auto-scroll to FinIQ -->
+          <div class="about-loading" id="aboutLoading">
+            <p class="loading-msg">Moving to my recent journey…</p>
+            <div class="loading-bar-track">
+              <div class="loading-bar-fill" id="loadingBarFill"></div>
+            </div>
+            <p class="loading-countdown" id="loadingCountdown">Auto-scrolling in 10s</p>
+          </div>
+
         </div>
 
-        <div class="intro-lower">
-          <div class="intro-about-text">
-            <p class="intro-subtitle" id="introSubtitle">
-              MSc · King's College London · Ex-FinIQ · AI Curious
-            </p>
-            <p class="intro-about-para" id="introAboutPara">
-              FinTech consultant turned AI-curious researcher. I spent two years at FinIQ delivering structured products for global banks, then moved to London to explore the intersection of technology and management at King's. Currently writing a dissertation on how AI is reshaping authority inside organisations — and genuinely fascinated by where it's all heading.
-            </p>
-          </div>
-          <div class="intro-profile" id="introProfile">
-            <img src="images/profile.png" alt="Kabir Mehta" />
-          </div>
+        <!-- Right: full-height rectangular photo panel -->
+        <div class="about-photo" id="introProfile">
+          <img src="images/profile.png" alt="Kabir Mehta" />
         </div>
 
       </div>
