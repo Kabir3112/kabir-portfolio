@@ -100,45 +100,71 @@ function initAboutAnimation() {
       runAboutAnimation();
       observer.disconnect();
     }
-  }, { threshold: 0.25 });
+  }, { threshold: 0.2 });
 
   observer.observe(aboutSection);
 }
 
 function runAboutAnimation() {
-  const line1    = document.getElementById('nameLine1');
-  const line2    = document.getElementById('nameLine2');
-  const underln  = document.getElementById('underline-path');
-  const profile  = document.getElementById('introProfile');
-  const subtitle = document.getElementById('introSubtitle');
-  const para     = document.getElementById('introAboutPara');
+  const line1     = document.getElementById('nameLine1');
+  const line2     = document.getElementById('nameLine2');
+  const underln   = document.getElementById('underline-path');
+  const photo     = document.getElementById('introProfile');   // .about-photo
+  const subtitle  = document.getElementById('introSubtitle');
+  const para      = document.getElementById('introAboutPara');
+  const loading   = document.getElementById('aboutLoading');
+  const barFill   = document.getElementById('loadingBarFill');
+  const countdown = document.getElementById('loadingCountdown');
 
-  // Ensure the panel-inner is immediately visible (it manages its own opacity)
-  const inner = document.getElementById('aboutPanelInner');
-  if (inner) {
-    inner.style.opacity   = '1';
-    inner.style.transform = 'none';
-  }
-
-  // Staggered entrance
+  // Staggered text entrance
   if (line1)    setTimeout(() => line1.classList.add('visible'),    150);
   if (line2)    setTimeout(() => line2.classList.add('visible'),    320);
   if (underln)  setTimeout(() => underln.classList.add('drawn'),    700);
-  if (profile)  setTimeout(() => profile.classList.add('visible'),  950);
-  if (subtitle) setTimeout(() => subtitle.classList.add('visible'), 1200);
-  if (para)     setTimeout(() => para.classList.add('visible'),     1400);
+  if (photo)    setTimeout(() => photo.classList.add('visible'),    500);
+  if (subtitle) setTimeout(() => subtitle.classList.add('visible'), 1100);
+  if (para)     setTimeout(() => para.classList.add('visible'),     1350);
+
+  // Show loading bar at 1700ms, then 10-second countdown → scroll to finiq
+  setTimeout(() => {
+    if (loading) loading.classList.add('active');
+
+    // Start bar fill (CSS transition: 10s linear)
+    if (barFill) {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        barFill.classList.add('running');
+      }));
+    }
+
+    // Countdown: update text every second
+    let secsLeft = 10;
+    const tick = setInterval(() => {
+      secsLeft--;
+      if (countdown) {
+        countdown.textContent = secsLeft > 0
+          ? `Auto-scrolling in ${secsLeft}s`
+          : 'Scrolling now…';
+      }
+      if (secsLeft <= 0) clearInterval(tick);
+    }, 1000);
+
+    // Scroll to finiq exactly 10 seconds after loading appears
+    setTimeout(() => {
+      const finiq = document.getElementById('finiq');
+      if (finiq) window.scrollTo({ top: finiq.offsetTop, behavior: 'smooth' });
+    }, 10000);
+
+  }, 1700);
 }
 
 /**
- * Auto-scroll to #finiq at 4500ms — lets the user absorb
- * the avatar intro before being taken to the main content.
+ * Gently scroll section 1 → section 2 at 3s so the user
+ * sees the "Kabir Mehta" page before the 10-second countdown.
  */
-function autoScrollToFiniq() {
+function autoScrollToAbout() {
   setTimeout(() => {
-    const finiq = document.getElementById('finiq');
-    if (!finiq) return;
-    window.scrollTo({ top: finiq.offsetTop, behavior: 'smooth' });
-  }, 4500);
+    const about = document.getElementById('intro-about');
+    if (about) window.scrollTo({ top: about.offsetTop, behavior: 'smooth' });
+  }, 3000);
 }
 
 
@@ -427,8 +453,8 @@ function boot() {
   // Section 2: about animation (triggers when section 2 enters viewport)
   initAboutAnimation();
 
-  // Auto-scroll to #finiq after 4.5s
-  autoScrollToFiniq();
+  // Slide to section 2 at 3s, then 10-second countdown → finiq
+  autoScrollToAbout();
 
   // UI
   initProgressBar();
