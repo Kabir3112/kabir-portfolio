@@ -355,27 +355,63 @@ body::-webkit-scrollbar {
 
 /* ─────────────────────────────────────────────────────────────
    9. INTRO ABOUT SECTION (section 2)
-   Name animation + short about text + profile photo
+   Two-column: text left + full-height photo right
 ───────────────────────────────────────────────────────────── */
+
+/* Remove default panel padding — photo must reach edges */
 #intro-about {
-  justify-content: flex-start;
-  align-items: center;
+  padding: 0;
+  align-items: stretch;
 }
 
-.intro-about-inner {
-  /* Own stagger animation — don't defer to panel-inner */
-  opacity: 1 !important;
-  transform: none !important;
-  max-width: 720px;
+/* Full-width flex row filling 100vh */
+.about-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: stretch;
+}
+
+/* Left column — text content, centred vertically */
+.about-content {
+  flex: 1;
+  min-width: 0;
+  padding: 7vh 7vw;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Right column — full-height rectangular photo */
+.about-photo {
+  width: clamp(260px, 33%, 500px);
+  flex-shrink: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(40px);
+  transition:
+    opacity  0.9s var(--ease) 0.3s,
+    transform 0.9s var(--ease) 0.3s;
+}
+
+.about-photo.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.about-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
 }
 
 /* Greeting */
 .intro-greeting {
   font-family: var(--font-sans);
-  font-size: clamp(0.85rem, 1.4vw, 1rem);
+  font-size: clamp(0.8rem, 1.3vw, 0.95rem);
   font-weight: 300;
   letter-spacing: 0.08em;
   opacity: 0.45;
@@ -384,12 +420,12 @@ body::-webkit-scrollbar {
 
 /* Name block */
 .intro-name-block {
-  margin-bottom: 2rem;
+  margin-bottom: 1.6rem;
 }
 
 .intro-name {
   font-family: var(--font-serif);
-  font-size: clamp(4.5rem, 12vw, 10rem);
+  font-size: clamp(4rem, 10vw, 9rem);
   font-weight: 300;
   line-height: 0.92;
   letter-spacing: -0.02em;
@@ -417,9 +453,9 @@ body::-webkit-scrollbar {
   transition-delay: 0.12s;
 }
 
-/* SVG Underline draw-on */
+/* SVG underline draw-on */
 .name-underline {
-  width: clamp(140px, 38vw, 300px);
+  width: clamp(130px, 34vw, 280px);
   height: auto;
   display: block;
   margin-top: 0.4rem;
@@ -436,23 +472,12 @@ body::-webkit-scrollbar {
   stroke-dashoffset: 0;
 }
 
-/* Lower row: about text + profile photo */
-.intro-lower {
-  display: flex;
-  align-items: flex-start;
-  gap: 2.5rem;
-}
-
-.intro-about-text {
-  flex: 1;
-}
-
-/* Subtitle / tagline */
+/* Subtitle */
 .intro-subtitle {
   font-family: var(--font-sans);
-  font-size: clamp(0.75rem, 1.3vw, 0.9rem);
+  font-size: clamp(0.7rem, 1.1vw, 0.82rem);
   font-weight: 400;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   opacity: 0;
   transform: translateY(8px);
@@ -467,53 +492,77 @@ body::-webkit-scrollbar {
   transform: translateY(0);
 }
 
-/* Short about paragraph */
+/* About paragraph */
 .intro-about-para {
   font-family: var(--font-serif);
-  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  font-size: clamp(0.95rem, 1.4vw, 1.1rem);
   font-style: italic;
-  line-height: 1.7;
+  line-height: 1.72;
   opacity: 0;
   transform: translateY(10px);
   transition:
-    opacity  0.7s var(--ease) 0.15s,
-    transform 0.7s var(--ease) 0.15s;
+    opacity  0.7s var(--ease) 0.1s,
+    transform 0.7s var(--ease) 0.1s;
   color: var(--cream);
+  margin-bottom: 0;
 }
 
 .intro-about-para.visible {
-  opacity: 0.72;
+  opacity: 0.68;
   transform: translateY(0);
 }
 
-/* Profile photo — circular */
-.intro-profile {
-  flex-shrink: 0;
-  width: clamp(80px, 10vw, 130px);
-  height: clamp(80px, 10vw, 130px);
-  border-radius: 50%;
-  overflow: hidden;
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 6px rgba(122, 154, 106, 0.1);
-  align-self: center;
-
+/* ── Loading bar + countdown ────────────────────────── */
+.about-loading {
+  margin-top: 2.2rem;
   opacity: 0;
-  transform: scale(0.7) rotate(-8deg);
+  transform: translateY(10px);
   transition:
-    opacity  0.6s var(--ease),
-    transform 0.7s var(--ease);
+    opacity  0.5s ease,
+    transform 0.5s ease;
 }
 
-.intro-profile.visible {
+.about-loading.active {
   opacity: 1;
-  transform: scale(1) rotate(0deg);
+  transform: translateY(0);
 }
 
-.intro-profile img {
+.loading-msg {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  opacity: 0.6;
+  margin-bottom: 0.85rem;
+}
+
+.loading-bar-track {
   width: 100%;
+  max-width: 300px;
+  height: 1.5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-bottom: 0.65rem;
+}
+
+.loading-bar-fill {
   height: 100%;
-  object-fit: cover;
-  object-position: top center;
+  width: 0%;
+  background: var(--green-light);
+  border-radius: 1px;
+}
+
+.loading-bar-fill.running {
+  width: 100%;
+  transition: width 10s linear;
+}
+
+.loading-countdown {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.35;
 }
 
 /* Scroll hint */
@@ -958,13 +1007,19 @@ body::-webkit-scrollbar {
     --panel-pad-y: 6vh;
   }
 
-  .intro-lower {
+  /* Stack photo below text on mobile */
+  .about-layout {
     flex-direction: column;
-    gap: 1.5rem;
   }
 
-  .intro-profile {
-    align-self: flex-start;
+  .about-photo {
+    width: 100%;
+    height: 45vh;
+    transform: none;
+  }
+
+  .about-content {
+    padding: 5vh 6vw;
   }
 
   .newsletter-form__row { flex-direction: column; }
