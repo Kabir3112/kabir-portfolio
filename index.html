@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kabir Mehta — Portfolio</title>
+  <meta name="description" content="Kabir Mehta — MSc King's College London · Ex-FinIQ · AI Curious" />
+
+  <!-- Google Fonts: Cormorant Garamond + DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════
+       PROGRESS BAR — fixed top, scaleX driven by JS
+  ═══════════════════════════════════════════════════ -->
+  <div id="progress-bar" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SIDE NAV — 14 dots
+  ═══════════════════════════════════════════════════ -->
+  <nav id="side-nav" aria-label="Section navigation">
+    <ul>
+      <li><button class="side-dot active" data-target="intro-avatar"        aria-label="Intro"><span class="dot-label">Intro</span></button></li>
+      <li><button class="side-dot"        data-target="intro-about"         aria-label="About"><span class="dot-label">About</span></button></li>
+      <li><button class="side-dot"        data-target="childhood"           aria-label="Childhood"><span class="dot-label">Childhood</span></button></li>
+      <li><button class="side-dot"        data-target="early-spark"         aria-label="Early Spark"><span class="dot-label">Early Spark</span></button></li>
+      <li><button class="side-dot"        data-target="christ"              aria-label="Christ Uni"><span class="dot-label">Christ Uni</span></button></li>
+      <li><button class="side-dot"        data-target="finiq"               aria-label="FinIQ"><span class="dot-label">FinIQ</span></button></li>
+      <li><button class="side-dot"        data-target="why-msc"             aria-label="London Move"><span class="dot-label">London Move</span></button></li>
+      <li><button class="side-dot"        data-target="kings"               aria-label="King's"><span class="dot-label">King's</span></button></li>
+      <li><button class="side-dot"        data-target="dissertation"        aria-label="Dissertation"><span class="dot-label">Dissertation</span></button></li>
+      <li><button class="side-dot"        data-target="ai-interest"         aria-label="AI"><span class="dot-label">AI</span></button></li>
+      <li><button class="side-dot"        data-target="personal"            aria-label="Personal"><span class="dot-label">Personal</span></button></li>
+      <li><button class="side-dot"        data-target="projects"            aria-label="Projects"><span class="dot-label">Projects</span></button></li>
+      <li><button class="side-dot"        data-target="certificates"        aria-label="Certs"><span class="dot-label">Certs</span></button></li>
+      <li><button class="side-dot"        data-target="newsletter-section"  aria-label="Newsletter"><span class="dot-label">Newsletter</span></button></li>
+    </ul>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════
+       PANELS — sticky-cover stacking
+       Each panel has position:sticky top:0 and increments
+       z-index so new panels slide up and cover old ones.
+  ═══════════════════════════════════════════════════ -->
+  <div id="panels-wrap">
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 1 · AVATAR ONLY (revolving)
+    ─────────────────────────────────────────────── -->
+    <section id="intro-avatar" class="panel" data-theme="dark" style="z-index:1">
+      <div class="panel-inner avatar-panel-inner" id="avatarPanelInner">
+        <div class="intro-avatar" id="introAvatar">
+          <img src="images/avatar.jpg" alt="Kabir Mehta avatar" />
+        </div>
+      </div>
+      <div class="scroll-hint" aria-hidden="true">
+        <span>scroll</span>
+        <div class="scroll-hint-line"></div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 2 · NAME + ABOUT + PROFILE
+    ─────────────────────────────────────────────── -->
+    <section id="intro-about" class="panel" data-theme="dark" style="z-index:2">
+      <div class="panel-inner intro-about-inner" id="aboutPanelInner">
+
+        <div class="intro-name-block">
+          <p class="intro-greeting">Hi, I'm</p>
+          <h1 class="intro-name" aria-label="Kabir Mehta">
+            <span class="name-line" id="nameLine1">Kabir</span>
+            <span class="name-line" id="nameLine2">Mehta.</span>
+          </h1>
+          <svg class="name-underline" viewBox="0 0 320 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path id="underline-path" d="M4 18 C 60 4, 160 28, 316 10" stroke="var(--green-light)" stroke-width="2.5" stroke-linecap="round" fill="none" pathLength="1"/>
+          </svg>
+        </div>
+
+        <div class="intro-lower">
+          <div class="intro-about-text">
+            <p class="intro-subtitle" id="introSubtitle">
+              MSc · King's College London · Ex-FinIQ · AI Curious
+            </p>
+            <p class="intro-about-para" id="introAboutPara">
+              FinTech consultant turned AI-curious researcher. I spent two years at FinIQ delivering structured products for global banks, then moved to London to explore the intersection of technology and management at King's. Currently writing a dissertation on how AI is reshaping authority inside organisations — and genuinely fascinated by where it's all heading.
+            </p>
+          </div>
+          <div class="intro-profile" id="introProfile">
+            <img src="images/profile.png" alt="Kabir Mehta" />
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 3 · CHILDHOOD
+    ─────────────────────────────────────────────── -->
+    <section id="childhood" class="panel" data-theme="cream" style="z-index:3">
+      <div class="panel-inner">
+        <p class="panel-meta">New Delhi, India · 2003–2020</p>
+        <h2 class="panel-title">Childhood</h2>
+        <p class="panel-tagline">Started with abacus… upgraded to AI curiosity.</p>
+
+        <button class="expand-btn" aria-expanded="false" data-target="childhood-expand">
+          Read more <span class="arrow">↓</span>
+        </button>
+
+        <div class="expandable" id="childhood-expand" aria-hidden="true">
+          <p>Grew up in New Delhi and studied at Amity International School, Pushp Vihar. Took Commerce with Maths — numbers always made sense.</p>
+          <p>Went to abacus classes and picked up quite a few trophies early on (peak performance age: 12–15 😄). Was into skating and racquet sports — can still play decently… after a warm-up and a reality check.</p>
+          <p>Always fascinated by technology — phones, tablets, cars — basically anything new. That curiosity never left. It just evolved into a deeper interest in AI.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 4 · EARLY SPARK
+    ─────────────────────────────────────────────── -->
+    <section id="early-spark" class="panel" data-theme="dark" style="z-index:4">
+      <div class="panel-inner">
+        <p class="panel-meta">The turning point · 2012–2020</p>
+        <h2 class="panel-title">Early Spark</h2>
+        <p class="panel-tagline">Blame Steve Jobs… and a lot of curiosity.</p>
+
+        <button class="expand-btn" aria-expanded="false" data-target="early-spark-expand">
+          Read more <span class="arrow">↓</span>
+        </button>
+
+        <div class="expandable" id="early-spark-expand" aria-hidden="true">
+          <p>Technology has always been a constant interest. Got inspired early after reading about Steve Jobs in middle school — followed Apple, then competitors, and kept going deeper.</p>
+          <p>AI became serious during COVID — had time to explore, learn, and do remote internships. That's when curiosity turned into something more intentional.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 5 · CHRIST UNIVERSITY
+    ─────────────────────────────────────────────── -->
+    <section id="christ" class="panel" data-theme="cream" style="z-index:5">
+      <div class="panel-inner">
+        <p class="panel-meta">Bengaluru, India · 2020–2023</p>
+        <h2 class="panel-title">Christ University</h2>
+        <p class="panel-tagline">Commerce made sense. Finance made more.</p>
+
+        <button class="expand-btn" aria-expanded="false" data-target="christ-expand">
+          Read more <span class="arrow">↓</span>
+        </button>
+
+        <div class="expandable" id="christ-expand" aria-hidden="true">
+          <p>Chose Commerce because of family business exposure and a natural grip on maths and accounting. Explored sales through internships, tried marketing competitions — but eventually moved toward finance for long-term growth.</p>
+          <p>Interned in Finance &amp; Accounting at Zoomcar. Graduated First Class Honours with a placement at FinIQ.</p>
+          <p>Served on the Audit Committee — learned attention to detail, task management, and delivering clean, accurate outputs.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 6 · FINIQ  ←  AUTO-SCROLL TARGET
+    ─────────────────────────────────────────────── -->
+    <section id="finiq" class="panel" data-theme="green" style="z-index:6">
+      <div class="panel-inner">
+        <p class="panel-meta">Bengaluru, India · Jun 2023 – Jul 2025</p>
+        <h2 class="panel-title">FinIQ</h2>
+        <p class="panel-tagline">From testing systems to testing what I really want.</p>
+
+        <button class="expand-btn" aria-expanded="false" data-target="finiq-expand">
+          Read more <span class="arrow">↓</span>
+        </button>
+
+        <div class="expandable" id="finiq-expand" aria-hidden="true">
+          <p>Product Application Consultant at FinIQ — a FinTech company building structured products platforms for banks globally.</p>
+          <ul>
+            <li>Led delivery and testing of structured products across equity, credit, and FX</li>
+            <li>Automated regression testing using SQL — reducing manual effort significantly</li>
+            <li>Provided on-site support for a leading institutional digital bank in North America</li>
+            <li>Collaborated with international clients across time zones</li>
+          </ul>
+          <blockquote>Start small → plan well → iterate → scale.</blockquote>
+          <p>This experience clarified what I want to pursue long-term.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 7 · WHY MSC / LONDON
+    ─────────────────────────────────────────────── -->
+    <section id="why-msc" class="panel" data-theme="dark" style="z-index:7">
+      <div class="panel-inner">
+        <p class="panel-meta">The decision · 2025</p>
+        <h2 class="panel-title">Why London?</h2>
+        <p class="panel-tagline">When curiosity gets serious, you move cities.</p>
+
+        <button class="expand-btn" aria-expanded="false" data-target="why-msc-expand">
+          Read more <span class="arrow">↓</span>
+        </button>
+
+        <div class="expandable" id="why-msc-expand" aria-hidden="true">
+          <p>After FinIQ, I chose to pursue an MSc in Management and Technological Change in London — for global perspectives, a deeper understanding of tech transformation, and to prepare for an AI-driven future.</p>
+          <p>Also: new people, new cultures, new experiences — all part of the journey.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 8 · KING'S COLLEGE LONDON
+    ─────────────────────────────────────────────── -->
+    <section id="kings" class="panel" data-theme="cream" style="z-index:8">
+      <div class="panel-inner">
+        <p class="panel-meta">London, UK · Sep 2025 – Sep 2026</p>
+        <h2 class="panel-title">King's College London</h2>
+        <p class="panel-tagline">Where tech meets management… and chaos meets structure.</p>
+
+        <button class="expand-btn" aria-expanded="false" data-target="kings-expand">
+          Read more <span class="arrow">↓</span>
+        </button>
+
+        <div class="expandable" id="kings-expand" aria-hidden="true">
+          <p>MSc Management and Technological Change — chosen to grow beyond FinTech and understand broader tech impact.</p>
+          <ul>
+            <li>Change management &amp; leadership in tech environments</li>
+            <li>Design sprints &amp; rapid prototyping</li>
+            <li>Working across diverse, international teams</li>
+          </ul>
+          <p>Balancing academics, dissertation, and AI exploration. Genuinely enjoying the process.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 9 · DISSERTATION
+    ─────────────────────────────────────────────── -->
+    <section id="dissertation" class="panel" data-theme="dark" style="z-index:9">
+      <div class="panel-inner">
+        <p class="panel-meta">Research · 2025–2026</p>
+        <h2 class="panel-title">Dissertation</h2>
+        <p class="panel-tagline">AI is changing roles. I'm studying the humans in between.</p>
+
+        <button class="expand-btn" aria-expanded="false" data-target="dissertation-expand">
+          Read more <span class="arrow">↓</span>
+        </button>
+
+        <div class="expandable" id="dissertation-expand" aria-hidden="true">
+          <p>Research focus: How AI is transforming roles and responsibilities within organisations.</p>
+          <ul>
+            <li>Management adaptation &amp; leadership shifts</li>
+            <li>Authority dynamics in AI-augmented teams</li>
+            <li>Who embraces AI vs. who resists</li>
+            <li>Qualitative interviews + extensive literature review</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 10 · AI INTEREST
+    ─────────────────────────────────────────────── -->
+    <section id="ai-interest" class="panel" data-theme="green" style="z-index:10">
+      <div class="panel-inner">
+        <p class="panel-meta">Ongoing</p>
+        <h2 class="panel-title">AI Interest</h2>
+        <p class="panel-tagline">Curiosity → automation → this might actually be serious.</p>
+
+        <button class="expand-btn" aria-expanded="false" data-target="ai-interest-expand">
+          Read more <span class="arrow">↓</span>
+        </button>
+
+        <div class="expandable" id="ai-interest-expand" aria-hidden="true">
+          <p>Shifted from curiosity to serious interest when I automated regression testing at FinIQ. That moment made me realise: this isn't just interesting — it's something I want to deeply pursue.</p>
+          <ul>
+            <li>Actively exploring AI tools daily</li>
+            <li>Certified: AI Fluency: Foundation &amp; Framework (Anthropic)</li>
+            <li>Thinking seriously about long-term impact</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 11 · PERSONAL
+    ─────────────────────────────────────────────── -->
+    <section id="personal" class="panel" data-theme="cream" style="z-index:11">
+      <div class="panel-inner">
+        <p class="panel-meta">Beyond the CV</p>
+        <h2 class="panel-title">Personal Side</h2>
+        <p class="panel-tagline">Organised… but not boring.</p>
+
+        <button class="expand-btn" aria-expanded="false" data-target="personal-expand">
+          Read more <span class="arrow">↓</span>
+        </button>
+
+        <div class="expandable" id="personal-expand" aria-hidden="true">
+          <ul class="personal-list">
+            <li>🏎️ Huge Formula 1 fan (Red Bull supporter)</li>
+            <li>🎵 Music is constant — techno, house, rap, rock, Indian music — whatever fits the mood</li>
+            <li>📋 Love staying organised and planning ahead</li>
+            <li>⚡ But also enjoy small spontaneous moments — keeps life interesting</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 12 · PROJECTS  (cards loaded via JS)
+    ─────────────────────────────────────────────── -->
+    <section id="projects" class="panel panel--wide" data-theme="dark" style="z-index:12">
+      <div class="panel-inner panel-inner--wide">
+        <p class="panel-meta">Built things · 2025–2026</p>
+        <h2 class="panel-title">Projects</h2>
+        <div id="projectsContainer" class="cards-grid cards-grid--dark">
+          <p class="loading-text">Loading projects…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 13 · CERTIFICATES  (cards loaded via JS)
+    ─────────────────────────────────────────────── -->
+    <section id="certificates" class="panel panel--wide" data-theme="cream" style="z-index:13">
+      <div class="panel-inner panel-inner--wide">
+        <p class="panel-meta">Earned · 2025–2026</p>
+        <h2 class="panel-title">Certificates</h2>
+        <div id="certsContainer" class="cards-grid cards-grid--light">
+          <p class="loading-text">Loading certificates…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────────────────────────
+         SECTION 14 · NEWSLETTER + FOOTER
+    ─────────────────────────────────────────────── -->
+    <section id="newsletter-section" class="panel" data-theme="green" style="z-index:14">
+      <div class="panel-inner">
+        <p class="panel-meta">Launching April 15</p>
+        <h2 class="panel-title">AI Newsletter</h2>
+        <p class="panel-tagline">Weekly insights on the AI world — no fluff, just signal.</p>
+
+        <form id="newsletterForm" class="newsletter-form" novalidate>
+          <div class="newsletter-form__row">
+            <input
+              type="email"
+              id="newsletterEmail"
+              name="email"
+              placeholder="your@email.com"
+              autocomplete="email"
+              required
+              aria-label="Email address for newsletter"
+            />
+            <button type="submit" class="newsletter-submit">
+              <span class="btn-text">Subscribe</span>
+              <span class="btn-loading" hidden aria-hidden="true">…</span>
+            </button>
+          </div>
+          <p id="newsletterMessage" class="newsletter-message" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="footer-links">
+          <a href="https://linkedin.com/in/kabirmehta-49860619a" target="_blank" rel="noopener noreferrer" class="footer-link">LinkedIn</a>
+          <span class="footer-link-divider" aria-hidden="true">·</span>
+          <a href="mailto:kabirmehta3112@gmail.com" class="footer-link">kabirmehta3112@gmail.com</a>
+        </div>
+
+        <footer class="site-footer">
+          <p>&copy; 2025 Kabir Mehta</p>
+        </footer>
+      </div>
+    </section>
+
+  </div><!-- /#panels-wrap -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
