@@ -443,8 +443,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 .avatar-panel-inner {
   max-width: none;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 2rem;
   opacity: 1 !important;
   transform: none !important;
 }
@@ -462,8 +464,50 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   transform: rotateY(0deg) scale(1);
 }
 
-.intro-avatar.visible img {
-  animation: idleRevolve 7s ease-in-out infinite 1.5s;
+.intro-avatar.visible .avatar-face {
+  animation: none;
+}
+
+.avatar-quip {
+  margin: 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15em;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  line-height: 1.1;
+  animation: quipFadeUp 1s var(--ease) 0.4s both;
+}
+
+.quip-line {
+  display: block;
+}
+
+/* Smaller lead-in line */
+.quip-line--1 {
+  font-size: clamp(1.4rem, 3.2vw, 2.8rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+  opacity: 0.75;
+}
+
+/* Larger, bolder punchline */
+.quip-line--2 {
+  font-size: clamp(2.4rem, 5.5vw, 5rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--green-light);
+  text-shadow:
+    0 0 40px rgba(122, 154, 106, 0.4),
+    0 0 80px rgba(122, 154, 106, 0.15);
+}
+
+@keyframes quipFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0);    }
 }
 
 @keyframes idleRevolve {
@@ -472,7 +516,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   70%       { transform: rotateY(-14deg); }
 }
 
-.intro-avatar img {
+.intro-avatar .avatar-face {
   width: 100%;
   height: auto;
   display: block;
