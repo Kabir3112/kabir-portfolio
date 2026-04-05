@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="Avatar/avatar.css" />
 
   <!-- Prevent browser scroll restoration on reload -->
   <script>
@@ -86,8 +87,16 @@
     ───────────────────────────────────────────── -->
     <section id="intro-avatar" class="panel" data-theme="dark" style="z-index:1">
       <div class="panel-inner avatar-panel-inner" id="avatarPanelInner">
+        <p class="avatar-quip">
+          <span class="quip-line quip-line--1">They're not staring&hellip;</span>
+          <span class="quip-line quip-line--2">they're networking.</span>
+        </p>
         <div class="intro-avatar" id="introAvatar">
-          <img src="images/avatar.png" alt="Kabir Mehta avatar" />
+          <div class="avatar-wrapper" data-debug="true">
+            <img class="avatar-face" src="Avatar/face.png" alt="Kabir Mehta avatar" draggable="false" />
+            <img class="eyeball eye-left"  src="Avatar/eyeball.png" alt="" draggable="false" />
+            <img class="eyeball eye-right" src="Avatar/eyeball.png" alt="" draggable="false" />
+          </div>
         </div>
       </div>
       <div class="scroll-indicator" aria-hidden="true">
@@ -505,6 +514,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="config.js"></script>
+  <script src="Avatar/avatar.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
