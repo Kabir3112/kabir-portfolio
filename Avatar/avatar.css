@@ -1,0 +1,28 @@
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%; /* fills .intro-avatar which controls the size */
+}
+
+.avatar-face {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.eyeball {
+  position: absolute;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  will-change: transform;
+}
+
+/* Calibrated positions — update these using debug mode */
+.eye-left  { left: 45.0%; top: 35.9%; }
+.eye-right { left: 60.0%; top: 35.5%; }
+.eyeball   { width: 4.1%; }
