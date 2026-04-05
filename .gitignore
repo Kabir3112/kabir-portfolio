@@ -1,2 +1,6 @@
 # Local dev config — not needed for deployment
 .claude/
+
+# Secrets — never commit these
+.env
+config.js
