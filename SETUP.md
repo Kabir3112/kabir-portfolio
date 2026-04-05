@@ -1,4 +1,4 @@
-# Setup — 3 quick steps
+# Setup — 4 quick steps
 
 ## Step 1 — Add your profile photo
 
@@ -6,7 +6,27 @@ Copy your photo into the `images/` folder and name it `profile.png`.
 
 ---
 
-## Step 2 — Supabase
+## Step 2 — Create your config file
+
+The site reads Supabase credentials from `config.js`, which is **gitignored and never committed**.
+
+1. Copy the template:
+   ```bash
+   cp config.example.js config.js
+   ```
+2. Open `config.js` and fill in your values:
+   ```js
+   window.SUPABASE_URL      = 'https://your-project-ref.supabase.co';
+   window.SUPABASE_ANON_KEY = 'your-anon-key-here';
+   ```
+3. Find these values at **supabase.com → your project → Settings → API**.
+
+> `config.js` and `.env` are listed in `.gitignore` — they will never be committed to git.
+> `.env` mirrors these values in standard env-file format for reference.
+
+---
+
+## Step 3 — Supabase
 
 1. Go to your Supabase project → **SQL Editor**
 2. Paste the full contents of `supabase.sql` and click **Run**
@@ -25,9 +45,9 @@ Copy your photo into the `images/` folder and name it `profile.png`.
 
 ---
 
-## Step 3 — Netlify
+## Step 4 — Deploy to Netlify
 
-Go to **[netlify.com/drop](https://netlify.com/drop)** and drag the entire `kabir-portfolio` folder onto the page.
+When you drag-and-drop to **[netlify.com/drop](https://netlify.com/drop)**, include `config.js` in the folder — it's gitignored (not in the repo) but must be present for the site to connect to Supabase.
 
 Done. Your site is live.
 
@@ -42,3 +62,15 @@ Open `index.html` and find the comment:
 ```
 
 Replace the paragraph text with your own content.
+
+---
+
+## Using with Claude Code
+
+Open the `kabir-portfolio/` folder in Claude Code. The `.claude/` directory contains launch configuration. Run the dev server with:
+
+```bash
+claude
+```
+
+Claude Code will read the project context and assist with edits. Your secrets stay local in `config.js` and `.env` — neither is committed.
