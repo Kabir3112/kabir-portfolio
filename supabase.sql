@@ -96,8 +96,8 @@ insert into projects (title, description, project_url) values
     'https://v0-ticketsphere.vercel.app'
   ),
   (
-    'KBS Micro Internship — Jobago AI',
-    'Student consultant on a 3-week industry project through King''s Business School. Researched megatrends relevant to Jobago AI — an AI-powered hiring and job-matching platform — and delivered strategic recommendations to the client.',
+    'KBS Micro Internship: Jobago AI',
+    'Student consultant on a 3-week industry project through King''s Business School. Researched megatrends relevant to Jobago AI, an AI-powered hiring and job-matching platform, and delivered strategic recommendations to the client.',
     null
   );
 

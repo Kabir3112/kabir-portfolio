@@ -692,8 +692,8 @@ const FALLBACK_PROJECTS = [
     project_url: 'https://v0-ticketsphere.vercel.app'
   },
   {
-    title: 'KBS Micro Internship — Jobago AI',
-    description: 'Student consultant on a 3-week industry project through King’s Business School. Researched megatrends relevant to Jobago AI — an AI-powered hiring and job-matching platform — and delivered strategic recommendations to the client.'
+    title: 'KBS Micro Internship: Jobago AI',
+    description: 'Student consultant on a 3-week industry project through King’s Business School. Researched megatrends relevant to Jobago AI, an AI-powered hiring and job-matching platform, and delivered strategic recommendations to the client.'
   }
 ];
 
@@ -716,7 +716,7 @@ async function loadProjects() {
     if (error) throw error;
 
     if (!data || data.length === 0) {
-      container.innerHTML = '<p class="loading-text">No projects yet — check back soon.</p>';
+      container.innerHTML = '<p class="loading-text">No projects yet. Check back soon.</p>';
       prepareCardMotion(container);
       return;
     }
@@ -815,7 +815,7 @@ async function loadCertificates() {
     if (error) throw error;
 
     if (!data || data.length === 0) {
-      container.innerHTML = '<p class="loading-text">No certificates yet — check back soon.</p>';
+      container.innerHTML = '<p class="loading-text">No certificates yet. Check back soon.</p>';
       prepareCardMotion(container);
       return;
     }
@@ -1007,7 +1007,7 @@ function initContactForm() {
       form.reset();
     } catch (err) {
       console.error('Contact form error:', err);
-      showStatus('Something went wrong — please email me directly at kabirmehta3112@gmail.com', 'error');
+      showStatus('Something went wrong. Please email me directly at kabirmehta3112@gmail.com', 'error');
     } finally {
       setLoading(false);
     }
@@ -1064,7 +1064,7 @@ function initNewsletterForm() {
       if (checkErr) throw checkErr;
 
       if (existing) {
-        showMessage("You're already subscribed — thanks for the enthusiasm 🙌", 'info');
+        showMessage("You're already subscribed. Thanks for the enthusiasm 🙌", 'info');
         setLoading(false);
         return;
       }

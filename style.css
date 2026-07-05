@@ -551,9 +551,39 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   margin-top: 0.35rem;
 }
 
-/* Tablet: content needs the full width — hide the collage */
+/* Tablet: no room for the side collage next to the text column,
+   so show the compact strip pinned to the top of the panel
+   (same treatment as mobile, slightly larger) */
 @media (max-width: 1099px) and (min-width: 768px) {
-  .panel-media { display: none; }
+  .panel-media {
+    top: calc(var(--panel-pad-y) + 2.5rem);
+    left: var(--panel-pad-x);
+    right: auto;
+    transform: none;
+    width: auto;
+    height: auto;
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+  }
+  .media-card {
+    position: static;
+    width: auto;
+    padding: 5px 5px 8px;
+    border-radius: 4px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+  }
+  .media-card img {
+    height: 84px;
+    width: auto;
+  }
+  /* Fade the strip out while a "Read more" block is open —
+     expanded content grows upward into the strip's space */
+  .panel:has(.expandable.open) .panel-media {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
 }
 
 
