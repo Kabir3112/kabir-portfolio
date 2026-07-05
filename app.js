@@ -14,8 +14,11 @@
    10. FinIQ context overlay
    11. Supabase — load projects
    12. Supabase — load certificates
-   13. Newsletter form
-   14. Boot
+   13. Auto-scroll guard
+   14. Sidebar visibility (auto-hide on idle)
+   15. Contact form (Supabase)
+   16. Newsletter form
+   17. Boot
    ============================================================ */
 
 
@@ -27,7 +30,11 @@
 const SUPABASE_URL      = window.SUPABASE_URL;
 const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
 
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* Null when config.js or the supabase-js CDN script failed to load —
+   loaders below fall back to static content instead of crashing. */
+const db = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
 
 
 /* ─────────────────────────────────────────────────────────────
@@ -36,6 +43,27 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let sections          = [];  // { el, inner } for all .panel elements
 let sectionScrollTops = new Map(); // cached absolute scroll positions
 let scrollRAF         = null;
+let aboutSequenceStarted = false;
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+const SECTION_MOTION = {
+  'intro-avatar':       { hero: true, depth: 10 },
+  'intro-about':        { hero: true, depth: 10 },
+  'childhood':          { extraVh: 26, depth: 10, textLead: 0.02 },
+  'early-spark':        { extraVh: 26, depth: 10, textLead: 0.03 },
+  'christ':             { extraVh: 26, depth: 10, textLead: 0.03 },
+  'finiq':              { extraVh: 88, depth: 16, textLead: 0.00 },
+  'why-msc':            { extraVh: 78, depth: 14, textLead: 0.01 },
+  'kings':              { extraVh: 34, depth: 10, textLead: 0.03 },
+  'dissertation':       { extraVh: 40, depth: 10, textLead: 0.03 },
+  'ai-interest':        { extraVh: 38, depth: 10, textLead: 0.02 },
+  'personal':           { extraVh: 24, depth: 8, textLead: 0.04 },
+  'projects':           { extraVh: 235, depth: 16, textLead: 0.00, cards: true },
+  'certificates':       { extraVh: 220, depth: 14, textLead: 0.00, cards: true },
+  'newsletter-section': { extraVh: 235, depth: 14, textLead: 0.00 },
+  'contact':            { extraVh: 62, depth: 8, textLead: 0.02 },
+};
 
 // Auto-scroll state — set to true the moment user touches scroll input
 let autoScrollCancelled  = false;
@@ -73,6 +101,66 @@ function getAbsoluteTop(el) {
   return el.getBoundingClientRect().top + window.scrollY;
 }
 
+function clamp(value, min = 0, max = 1) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function lerp(start, end, amount) {
+  return start + (end - start) * amount;
+}
+
+function easeOutCubic(value) {
+  const x = clamp(value);
+  return 1 - Math.pow(1 - x, 3);
+}
+
+function easeInOutSine(value) {
+  const x = clamp(value);
+  return -(Math.cos(Math.PI * x) - 1) / 2;
+}
+
+function getSectionMotion(id) {
+  return SECTION_MOTION[id] || {};
+}
+
+function wrapRevealLines(el) {
+  if (!el || el.dataset.revealReady === 'true') return;
+
+  const html = el.innerHTML.trim();
+  if (!html) return;
+
+  const lines = html.split(/<br\s*\/?>/i).map(line => line.trim()).filter(Boolean);
+  const finalLines = lines.length ? lines : [html];
+
+  el.innerHTML = finalLines.map(line =>
+    `<span class="text-reveal-line"><span class="text-reveal-inner">${line}</span></span>`
+  ).join('');
+  el.dataset.revealReady = 'true';
+}
+
+function prepareTextReveals(root = document) {
+  root.querySelectorAll('.panel-title, .panel-tagline, .name-line').forEach(wrapRevealLines);
+}
+
+function updateRevealElement(el, progress, baseDelay = 0) {
+  if (!el) return;
+
+  const lines = el.querySelectorAll('.text-reveal-line');
+  if (!lines.length) return;
+
+  lines.forEach((line, index) => {
+    const lineProgress = easeOutCubic(clamp((progress - baseDelay) * 2.2 - index * 0.12));
+    line.style.setProperty('--line-reveal', lineProgress.toFixed(3));
+  });
+}
+
+function prepareCardMotion(container) {
+  if (!container) return;
+  container.querySelectorAll('.tl-card').forEach((card, index) => {
+    card.style.setProperty('--card-index', String(index));
+  });
+}
+
 /* ─────────────────────────────────────────────────────────────
    3. STORY-BLOCK SCROLL ARCHITECTURE
    ─────────────────────────────────────────────────────────────
@@ -91,7 +179,14 @@ function getAbsoluteTop(el) {
 /** Set inline heights on all story-blocks based on data-extra-vh */
 function setStoryBlockHeights() {
   document.querySelectorAll('.story-block').forEach(block => {
-    const extra = parseFloat(block.dataset.extraVh) || 150;
+    const panel = block.querySelector('.panel');
+    const motion = panel ? getSectionMotion(panel.id) : {};
+    const declared = block.dataset.extraVh !== undefined && block.dataset.extraVh !== ''
+      ? parseFloat(block.dataset.extraVh)
+      : NaN;
+    const extra = Number.isFinite(declared)
+      ? Math.max(declared, motion.extraVh ?? declared)
+      : (motion.extraVh ?? 150);
     block.style.height = `${100 + extra}vh`;
   });
 }
@@ -108,6 +203,7 @@ function onScroll() {
 }
 
 function initScrollStory() {
+  prepareTextReveals();
   setStoryBlockHeights();
 
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -127,22 +223,162 @@ function initScrollStory() {
  * from the entrance `transform` animation.
  */
 function updateParallax() {
-  sections.forEach(({ el }) => {
-    const inner = el.querySelector('.panel-inner');
-    if (!inner || !inner.classList.contains('in-view')) return;
+  if (prefersReducedMotion.matches) {
+    updateHeroSequence(true);
+    sections.forEach(({ el, inner }) => {
+      el.style.setProperty('--panel-stage-y', '0px');
+      el.style.setProperty('--panel-stage-x', '0px');
+      el.style.setProperty('--panel-stage-scale', '1');
+      el.style.setProperty('--panel-stage-rotate', '0deg');
+      el.style.setProperty('--panel-stage-opacity', '1');
+      el.style.setProperty('--panel-progress', '1');
+      inner?.classList.add('in-view');
+      if (inner) {
+        inner.style.setProperty('--panel-opacity', '1');
+        inner.style.setProperty('--panel-shift-y', '0px');
+        inner.style.setProperty('--panel-scale', '1');
+        inner.style.setProperty('--panel-blur', '0px');
+      }
+      updateRevealElement(el.querySelector('.panel-title'), 1);
+      updateRevealElement(el.querySelector('.panel-tagline'), 1);
+    });
+    document.querySelectorAll('.tl-card').forEach(card => {
+      card.style.setProperty('--card-opacity', '1');
+      card.style.setProperty('--card-y', '0px');
+      card.style.setProperty('--card-scale', '1');
+      card.style.setProperty('--card-rotate', '0deg');
+    });
+    return;
+  }
 
-    const block    = el.closest('.story-block') || el;
-    const blockTop = sectionScrollTops.get(el.id) ?? 0;
-    const blockH   = block.offsetHeight;
-    if (!blockH) return;
+  updateHeroSequence();
 
-    const scrolled  = window.scrollY - blockTop;
-    const progress  = Math.max(0, Math.min(scrolled / blockH, 1));
-    const dist      = block.classList.contains('story-block') ? 80 : 30;
-    const y         = Math.round(-progress * dist);
+  const viewportH = window.innerHeight;
+  const viewportCenter = window.scrollY + viewportH * 0.52;
 
-    inner.style.setProperty('--p-y', `${y}px`);
+  sections.forEach(({ el, inner }) => {
+    if (!inner) return;
+
+    const block = el.closest('.story-block') || el;
+    const blockTop = sectionScrollTops.get(el.id) ?? getAbsoluteTop(block);
+    const blockH = block.offsetHeight || viewportH;
+    const motion = getSectionMotion(el.id);
+    const depth = motion.depth ?? (block.classList.contains('story-block') ? 18 : 12);
+
+    const travelStart = blockTop - viewportH * 0.74;
+    const travelEnd = blockTop + blockH - viewportH * 0.12;
+    const progress = clamp((window.scrollY - travelStart) / Math.max(travelEnd - travelStart, 1));
+    const settle = easeOutCubic(clamp(progress / 0.16));
+    const hold = clamp((progress - 0.16) / 0.56);
+    const exit = easeInOutSine(clamp((progress - 0.78) / 0.18));
+    const focusDistance = Math.abs((blockTop + blockH * 0.5) - viewportCenter);
+    const focus = clamp(1 - focusDistance / (viewportH * 0.9));
+
+    const panelEnterY = lerp(18, 0, settle);
+    const panelExitY = lerp(0, -8, exit);
+    const panelY = panelEnterY + panelExitY;
+    const panelEnterX = lerp(-88, 0, settle);
+    const panelExitX = lerp(0, 108, exit);
+    const panelX = panelEnterX + panelExitX;
+    const panelScale = progress < 0.78 ? lerp(1.018, 1, settle) : lerp(1, 0.992, exit);
+    const panelRotate = progress < 0.74 ? lerp(-12, 0, settle) : lerp(0, 16, exit);
+    const panelOpacity = progress < 0.9
+      ? clamp(0.86 + settle * 0.14 + focus * 0.04, 0, 1)
+      : clamp(1 - ((progress - 0.9) / 0.1) * 0.14, 0.86, 1);
+
+    const entranceY = lerp(28, 0, settle);
+    const holdDrift = lerp(depth * 0.28, -depth * 0.18, hold);
+    const exitY = lerp(0, -10, exit);
+    const totalY = entranceY + holdDrift + exitY;
+    const opacity = clamp(0.18 + settle * 0.82 + focus * 0.03, 0, 1);
+    const scale = 1;
+
+    el.style.setProperty('--panel-stage-y', `${panelY.toFixed(2)}px`);
+    el.style.setProperty('--panel-stage-x', `${panelX.toFixed(2)}px`);
+    el.style.setProperty('--panel-stage-scale', panelScale.toFixed(3));
+    el.style.setProperty('--panel-stage-rotate', `${panelRotate.toFixed(2)}deg`);
+    el.style.setProperty('--panel-stage-opacity', panelOpacity.toFixed(3));
+    el.style.setProperty('--panel-progress', progress.toFixed(3));
+
+    inner.classList.toggle('in-view', progress > 0.02);
+    inner.style.setProperty('--panel-progress', progress.toFixed(3));
+    inner.style.setProperty('--panel-opacity', opacity.toFixed(3));
+    inner.style.setProperty('--panel-shift-y', `${totalY.toFixed(2)}px`);
+    inner.style.setProperty('--panel-scale', scale.toFixed(3));
+    inner.style.setProperty('--panel-blur', '0px');
+
+    const title = el.querySelector('.panel-title');
+    const tagline = el.querySelector('.panel-tagline');
+    const textLead = motion.textLead ?? 0.08;
+    updateRevealElement(title, clamp((progress - textLead) / 0.16));
+    updateRevealElement(tagline, clamp((progress - (textLead + 0.05)) / 0.14));
+
+    const cardsContainer = el.querySelector('.cards-grid');
+    if (motion.cards && cardsContainer) {
+      cardsContainer.querySelectorAll('.tl-card').forEach((card, index) => {
+        const base = clamp(((progress - 0.08) / 0.18) - index * 0.08);
+        const cardProgress = easeOutCubic(base);
+        card.style.setProperty('--card-opacity', clamp(0.25 + cardProgress * 0.75).toFixed(3));
+        card.style.setProperty('--card-y', `${lerp(24, 0, cardProgress).toFixed(2)}px`);
+        card.style.setProperty('--card-scale', lerp(0.985, 1, cardProgress).toFixed(3));
+        card.style.setProperty('--card-rotate', `${lerp(1.5, 0, cardProgress).toFixed(2)}deg`);
+      });
+    }
   });
+}
+
+function updateHeroSequence(forceComplete = false) {
+  const avatarPanel = document.getElementById('intro-avatar');
+  const avatar = document.getElementById('introAvatar');
+  const avatarPanelInner = document.getElementById('avatarPanelInner');
+  const about = document.getElementById('intro-about');
+  const aboutContent = document.getElementById('aboutPanelInner');
+  const indicator = avatarPanel?.querySelector('.scroll-indicator');
+  const line1 = document.getElementById('nameLine1');
+  const line2 = document.getElementById('nameLine2');
+  const subtitle = document.getElementById('introSubtitle');
+  const aboutPara = document.getElementById('introAboutPara');
+  const underline = document.getElementById('underline-path');
+
+  if (!avatarPanel || !about) return;
+
+  const viewportH = window.innerHeight;
+  const aboutTop = sectionScrollTops.get('intro-about') ?? getAbsoluteTop(about);
+  const heroSpan = Math.max(viewportH * 0.95, aboutTop);
+  const heroProgress = forceComplete ? 1 : clamp(window.scrollY / Math.max(heroSpan, 1));
+  const dockProgress = easeInOutSine(clamp((heroProgress - 0.06) / 0.52));
+  const aboutProgress = easeOutCubic(clamp((heroProgress - 0.16) / 0.42));
+
+  avatarPanelInner?.style.setProperty('--hero-avatar-y', '0px');
+  avatarPanelInner?.style.setProperty('--hero-avatar-scale', '1');
+  avatarPanelInner?.style.setProperty('--hero-avatar-opacity', clamp(1 - dockProgress * 1.1).toFixed(3));
+  avatarPanelInner?.style.setProperty('--hero-quip-opacity', clamp(1 - dockProgress * 1.4).toFixed(3));
+  avatar?.style.setProperty('--avatar-screen-x', '0px');
+  avatar?.style.setProperty('--avatar-screen-y', `${lerp(0, -24, dockProgress).toFixed(2)}px`);
+  avatar?.style.setProperty('--avatar-screen-scale', lerp(1, 0.88, dockProgress).toFixed(3));
+  avatar?.style.setProperty('--hero-avatar-tilt', `${lerp(0, -8, dockProgress).toFixed(2)}deg`);
+  indicator?.style.setProperty('--hero-indicator-opacity', clamp(1 - dockProgress * 1.6).toFixed(3));
+
+  aboutContent?.style.setProperty('--about-shift-y', `${lerp(52, 0, aboutProgress).toFixed(2)}px`);
+  aboutContent?.style.setProperty('--about-opacity', clamp(0.1 + aboutProgress * 0.9).toFixed(3));
+
+  line1?.classList.toggle('visible', aboutProgress > 0.08);
+  line2?.classList.toggle('visible', aboutProgress > 0.18);
+  subtitle?.classList.toggle('visible', aboutProgress > 0.44);
+  aboutPara?.classList.toggle('visible', aboutProgress > 0.56);
+
+  updateRevealElement(line1, clamp((aboutProgress - 0.02) * 1.28));
+  updateRevealElement(line2, clamp((aboutProgress - 0.14) * 1.28));
+
+  if (underline) {
+    underline.style.strokeDashoffset = String(1 - clamp((aboutProgress - 0.22) * 1.4));
+    underline.classList.toggle('drawn', aboutProgress > 0.84);
+  }
+
+  if (!aboutSequenceStarted && (forceComplete || aboutProgress > 0.72)) {
+    runAboutAnimation();
+    aboutSequenceStarted = true;
+  }
 }
 
 
@@ -151,12 +387,14 @@ function updateParallax() {
    .panel-inner and .panel-text.panel-inner fade up on entry.
 ───────────────────────────────────────────────────────────── */
 function initReveal() {
+  if (prefersReducedMotion.matches) {
+    document.querySelectorAll('.panel-inner').forEach(el => el.classList.add('in-view'));
+    return;
+  }
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('in-view');
-        observer.unobserve(entry.target);
-      }
+      entry.target.classList.toggle('in-view', entry.isIntersecting);
     });
   }, { threshold: 0.08 });
 
@@ -180,36 +418,27 @@ function runAvatarAnimation() {
 
 /** S2: watch for intro-about entering viewport */
 function initAboutAnimation() {
-  const about = document.getElementById('intro-about');
-  if (!about) return;
-
-  const obs = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting) {
-      runAboutAnimation();
-      obs.disconnect();
-    }
-  }, { threshold: 0.2 });
-
-  obs.observe(about);
+  updateHeroSequence();
 }
 
 function runAboutAnimation() {
+  if (runAboutAnimation.started) return;
+  runAboutAnimation.started = true;
+
   const line1     = document.getElementById('nameLine1');
   const line2     = document.getElementById('nameLine2');
   const underln   = document.getElementById('underline-path');
-  const photo     = document.getElementById('introProfile');
   const subtitle  = document.getElementById('introSubtitle');
   const para      = document.getElementById('introAboutPara');
   const loading   = document.getElementById('aboutLoading');
   const barFill   = document.getElementById('loadingBarFill');
   const countdown = document.getElementById('loadingCountdown');
 
-  if (line1)    setTimeout(() => line1.classList.add('visible'),    150);
-  if (line2)    setTimeout(() => line2.classList.add('visible'),    320);
-  if (underln)  setTimeout(() => underln.classList.add('drawn'),    700);
-  if (photo)    setTimeout(() => photo.classList.add('visible'),    500);
-  if (subtitle) setTimeout(() => subtitle.classList.add('visible'), 1100);
-  if (para)     setTimeout(() => para.classList.add('visible'),     1350);
+  if (line1) line1.classList.add('visible');
+  if (line2) line2.classList.add('visible');
+  if (underln) setTimeout(() => underln.classList.add('drawn'), 220);
+  if (subtitle) subtitle.classList.add('visible');
+  if (para) para.classList.add('visible');
 
   // Loading bar → auto-scroll to FinIQ
   _asBarTimer = setTimeout(() => {
@@ -310,7 +539,12 @@ function updateActiveNav() {
   });
 
   document.querySelectorAll('.nav-item, .mob-nav-item').forEach(item => {
-    item.classList.toggle('active', item.dataset.target === activeId);
+    const top = sectionScrollTops.get(item.dataset.target) ?? 0;
+    const strength = clamp(1 - Math.abs((top - trigger) / window.innerHeight));
+    const isActive = item.dataset.target === activeId;
+    item.classList.toggle('active', isActive);
+    item.setAttribute('aria-current', isActive ? 'true' : 'false');
+    item.style.setProperty('--nav-strength', strength.toFixed(3));
   });
 }
 
@@ -447,6 +681,28 @@ function initFiniqOverlay() {
 /* ─────────────────────────────────────────────────────────────
    11. SUPABASE — LOAD PROJECTS
 ───────────────────────────────────────────────────────────── */
+
+/* Static fallback content, shown when Supabase is unreachable
+   (e.g. the free-tier project is paused). Keep in sync with
+   the seed data in supabase.sql. */
+const FALLBACK_PROJECTS = [
+  {
+    title: 'TicketSphere',
+    description: 'A digital ticketing platform designed and built during an intensive one-week design sprint at King’s Business School. Taken from concept to a live website and app prototype in five days. Awarded 2nd place for best website and app by students and industry panellists.',
+    project_url: 'https://v0-ticketsphere.vercel.app'
+  },
+  {
+    title: 'KBS Micro Internship — Jobago AI',
+    description: 'Student consultant on a 3-week industry project through King’s Business School. Researched megatrends relevant to Jobago AI — an AI-powered hiring and job-matching platform — and delivered strategic recommendations to the client.'
+  }
+];
+
+const FALLBACK_CERTS = [
+  { title: 'AI Fluency: Foundation & Framework', issuer: 'Anthropic' },
+  { title: 'Design Sprint', issuer: 'King’s College London' },
+  { title: 'King’s Business School Micro Internship', issuer: 'King’s College London' }
+];
+
 async function loadProjects() {
   const container = document.getElementById('projectsContainer');
   if (!container) return;
@@ -461,12 +717,17 @@ async function loadProjects() {
 
     if (!data || data.length === 0) {
       container.innerHTML = '<p class="loading-text">No projects yet — check back soon.</p>';
+      prepareCardMotion(container);
       return;
     }
     container.innerHTML = data.map(buildProjectCard).join('');
+    prepareCardMotion(container);
+    updateParallax();
   } catch (err) {
-    console.error('Failed to load projects:', err);
-    container.innerHTML = '<p class="error-text">Could not load projects. Please refresh.</p>';
+    console.warn('Projects: Supabase unreachable, showing fallback content.', err);
+    container.innerHTML = FALLBACK_PROJECTS.map(buildProjectCard).join('');
+    prepareCardMotion(container);
+    updateParallax();
   }
 }
 
@@ -555,12 +816,17 @@ async function loadCertificates() {
 
     if (!data || data.length === 0) {
       container.innerHTML = '<p class="loading-text">No certificates yet — check back soon.</p>';
+      prepareCardMotion(container);
       return;
     }
     container.innerHTML = data.map(buildCertCard).join('');
+    prepareCardMotion(container);
+    updateParallax();
   } catch (err) {
-    console.error('Failed to load certificates:', err);
-    container.innerHTML = '<p class="error-text">Could not load certificates. Please refresh.</p>';
+    console.warn('Certificates: Supabase unreachable, showing fallback content.', err);
+    container.innerHTML = FALLBACK_CERTS.map(buildCertCard).join('');
+    prepareCardMotion(container);
+    updateParallax();
   }
 }
 
@@ -703,7 +969,7 @@ function initSidebarVisibility() {
 
 
 /* ─────────────────────────────────────────────────────────────
-   14. CONTACT FORM (Supabase)
+   15. CONTACT FORM (Supabase)
 ───────────────────────────────────────────────────────────── */
 function initContactForm() {
   const form      = document.getElementById('contactForm');
@@ -763,7 +1029,7 @@ function initContactForm() {
 
 
 /* ─────────────────────────────────────────────────────────────
-   15. NEWSLETTER FORM
+   16. NEWSLETTER FORM
 ───────────────────────────────────────────────────────────── */
 function initNewsletterForm() {
   const form      = document.getElementById('newsletterForm');
@@ -809,7 +1075,7 @@ function initNewsletterForm() {
 
       if (insertErr) throw insertErr;
 
-      showMessage("You're in! First issue drops April 15. 🚀", 'success');
+      showMessage("You're in! I'll email you the moment the first issue drops. 🚀", 'success');
       form.reset();
     } catch (err) {
       console.error('Newsletter error:', err);
@@ -835,7 +1101,7 @@ function initNewsletterForm() {
 
 
 /* ─────────────────────────────────────────────────────────────
-   14. BOOT
+   17. BOOT
 ───────────────────────────────────────────────────────────── */
 function boot() {
   // Collect all panels
@@ -843,6 +1109,9 @@ function boot() {
     el,
     inner: el.querySelector('.panel-inner, .panel-text'),
   }));
+
+  const copyrightYear = document.getElementById('copyrightYear');
+  if (copyrightYear) copyrightYear.textContent = new Date().getFullYear();
 
   // ── Architecture ──────────────────────────────────────────
   // 1. Set story-block heights (must be before position caching)

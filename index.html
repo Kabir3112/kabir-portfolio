@@ -5,6 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kabir Mehta — Portfolio</title>
   <meta name="description" content="Kabir Mehta — MSc King's College London · Ex-FinIQ · AI Curious" />
+  <meta name="theme-color" content="#111111" />
+
+  <!-- Favicon — inline SVG monogram, no binary asset needed -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='rgb(30,51,32)'/%3E%3Ctext x='50' y='69' font-family='Georgia,serif' font-size='58' fill='rgb(122,154,106)' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E" />
+
+  <!-- Open Graph / social sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Kabir Mehta — Portfolio" />
+  <meta property="og:description" content="MSc King's College London · Ex-FinIQ · AI Curious" />
+  <meta property="og:image" content="images/avatar.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Kabir Mehta — Portfolio" />
+  <meta name="twitter:description" content="MSc King's College London · Ex-FinIQ · AI Curious" />
+  <meta name="twitter:image" content="images/avatar.png" />
 
   <!-- Google Fonts: Cormorant Garamond + DM Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -92,7 +106,7 @@
           <span class="quip-line quip-line--2">they're networking.</span>
         </p>
         <div class="intro-avatar" id="introAvatar">
-          <div class="avatar-wrapper" data-debug="true">
+          <div class="avatar-wrapper">
             <img class="avatar-face" src="Avatar/face.png" alt="Kabir Mehta avatar" draggable="false" />
             <img class="eyeball eye-left"  src="Avatar/eyeball.png" alt="" draggable="false" />
             <img class="eyeball eye-right" src="Avatar/eyeball.png" alt="" draggable="false" />
@@ -135,9 +149,6 @@
             <p class="loading-countdown" id="loadingCountdown">Auto-scrolling in 10s</p>
           </div>
         </div>
-        <div class="about-photo" id="introProfile">
-          <img src="images/profile.png" alt="Kabir Mehta" />
-        </div>
       </div>
     </section>
 
@@ -146,6 +157,17 @@
     ───────────────────────────────────────────── -->
     <div class="story-block" data-extra-vh="0">
       <section id="childhood" class="panel" data-theme="cream" style="z-index:3">
+        <div class="panel-media">
+          <figure class="media-card" style="--x:0%; --y:2%; --w:80%; --tilt:-3deg; --ar:16/9; --d:0">
+            <img src="images/School.jpeg" alt="Shelf of school trophies from Amity International School" loading="lazy" />
+          </figure>
+          <figure class="media-card" style="--x:24%; --y:34%; --w:66%; --tilt:2.5deg; --ar:4/3; --d:0.05">
+            <img src="images/AVTE.jpeg" alt="Academic award trophies for maths, accounts and English" loading="lazy" />
+          </figure>
+          <figure class="media-card" style="--x:2%; --y:64%; --w:60%; --tilt:-2deg; --ar:16/9; --d:0.1">
+            <img src="images/BrainOBrain.jpeg" alt="Brainobrain abacus competition medals" loading="lazy" />
+          </figure>
+        </div>
         <div class="panel-inner">
           <p class="panel-meta">Born on 31-12-2001</p>
           <h2 class="panel-title">Younger Me</h2>
@@ -157,6 +179,28 @@
             <p>Grew up in New Delhi and studied at Amity International School, Pushp Vihar. Took Commerce with Maths — numbers always made sense.</p>
             <p>Went to abacus classes and picked up quite a few trophies early on (peak performance age: 12–15 😄). Was into skating and racquet sports — can still play decently… after a warm-up and a reality check.</p>
             <p>Always fascinated by technology — phones, tablets, cars — basically anything new. That curiosity never left. It just evolved into a deeper interest in AI.</p>
+            <div class="expand-gallery">
+              <figure>
+                <img src="images/Olympiad.jpeg" alt="Maths Olympiad medals" loading="lazy" />
+                <figcaption>Olympiad medals</figcaption>
+              </figure>
+              <figure>
+                <img src="images/Olympiad1.jpeg" alt="International Olympiad of Mathematics certificate, 2nd in class" loading="lazy" />
+                <figcaption>IOM certificate</figcaption>
+              </figure>
+              <figure>
+                <img src="images/BrainOBrain2.jpeg" alt="Brainobrain national abacus champion certificate" loading="lazy" />
+                <figcaption>Abacus champion</figcaption>
+              </figure>
+              <figure>
+                <img src="images/Soccer.jpeg" alt="Soccer academy medal" loading="lazy" />
+                <figcaption>Soccer days</figcaption>
+              </figure>
+              <figure>
+                <img src="images/Tennis.jpeg" alt="Fort Knox tennis tournament certificate" loading="lazy" />
+                <figcaption>Tennis tournament</figcaption>
+              </figure>
+            </div>
           </div>
         </div>
       </section>
@@ -167,6 +211,11 @@
     ───────────────────────────────────────────── -->
     <div class="story-block" data-extra-vh="0">
       <section id="early-spark" class="panel" data-theme="dark" style="z-index:4">
+        <div class="panel-media">
+          <figure class="media-card" style="--x:12%; --y:22%; --w:70%; --tilt:-2.5deg; --ar:9/8; --d:0">
+            <img src="images/SteveJobs.webp" alt="Steve Jobs holding an iPhone" loading="lazy" />
+          </figure>
+        </div>
         <div class="panel-inner">
           <p class="panel-meta">Turning Point</p>
           <h2 class="panel-title">Early Spark</h2>
@@ -187,6 +236,11 @@
     ───────────────────────────────────────────── -->
     <div class="story-block" data-extra-vh="0">
       <section id="christ" class="panel" data-theme="cream" style="z-index:5">
+        <div class="panel-media">
+          <figure class="media-card media-card--logo" style="--x:20%; --y:28%; --w:52%; --tilt:2deg; --ar:1/1; --d:0">
+            <img src="images/Christ.webp" alt="Christ University crest" loading="lazy" />
+          </figure>
+        </div>
         <div class="panel-inner">
           <p class="panel-meta">Bengaluru, India · 2020–2023</p>
           <h2 class="panel-title">Christ University</h2>
@@ -208,6 +262,11 @@
     ───────────────────────────────────────────── -->
     <div class="story-block" data-extra-vh="0">
       <section id="finiq" class="panel" data-theme="green" style="z-index:6">
+        <div class="panel-media">
+          <figure class="media-card media-card--logo" style="--x:14%; --y:32%; --w:64%; --tilt:-2deg; --ar:2.2/1; --d:0">
+            <img src="images/FinIQ.webp" alt="FinIQ — The Financial Engineering Company logo" loading="lazy" />
+          </figure>
+        </div>
         <div class="panel-inner">
           <p class="panel-meta">Bengaluru, India · Jun 2023 – Jul 2025</p>
           <h2 class="panel-title">FinIQ</h2>
@@ -255,6 +314,11 @@
     ───────────────────────────────────────────── -->
     <div class="story-block" data-extra-vh="0">
       <section id="kings" class="panel" data-theme="cream" style="z-index:8">
+        <div class="panel-media">
+          <figure class="media-card media-card--logo" style="--x:16%; --y:30%; --w:58%; --tilt:2.5deg; --ar:1.85/1; --d:0">
+            <img src="images/KCL.webp" alt="King's College London logo" loading="lazy" />
+          </figure>
+        </div>
         <div class="panel-inner">
           <p class="panel-meta">London, UK · Sep 2025 – Sep 2026</p>
           <h2 class="panel-title">King's College London</h2>
@@ -329,6 +393,14 @@
     ───────────────────────────────────────────── -->
     <div class="story-block" data-extra-vh="0">
       <section id="personal" class="panel" data-theme="cream" style="z-index:11">
+        <div class="panel-media">
+          <figure class="media-card" style="--x:0%; --y:14%; --w:74%; --tilt:-3deg; --ar:16/9; --d:0">
+            <img src="images/Redbull.webp" alt="Red Bull Formula 1 car" loading="lazy" />
+          </figure>
+          <figure class="media-card" style="--x:24%; --y:52%; --w:66%; --tilt:2.5deg; --ar:3/2; --d:0.06">
+            <img src="images/fredagain.webp" alt="Fred Again playing keys on a London rooftop" loading="lazy" />
+          </figure>
+        </div>
         <div class="panel-inner">
           <p class="panel-meta">Beyond the CV</p>
           <h2 class="panel-title">Personal Side</h2>
@@ -384,7 +456,7 @@
     <div class="story-block" data-extra-vh="200">
     <section id="newsletter-section" class="panel" data-theme="green" style="z-index:14">
       <div class="panel-inner">
-        <p class="newsletter-launch-date">Launching April 30, 2026</p>
+        <p class="newsletter-launch-date">Coming soon</p>
         <h2 class="panel-title">AI Newsletter</h2>
         <p class="panel-tagline">Weekly insights on the AI world — no fluff, just signal.</p>
 
@@ -409,7 +481,7 @@
         </div>
 
         <footer class="site-footer">
-          <p>&copy; 2025 Kabir Mehta</p>
+          <p>&copy; <span id="copyrightYear">2026</span> Kabir Mehta</p>
         </footer>
       </div>
     </section>

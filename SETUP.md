@@ -1,8 +1,8 @@
-# Setup — 4 quick steps
+# Setup — 3 quick steps
 
-## Step 1 — Add your profile photo
+## Step 1 — Add photos
 
-Copy your photo into the `images/` folder and name it `profile.png`.
+Drop any photos you want to use into the `images/` folder, then reference them from `index.html` (or wire them into a timeline section's markup/CSS).
 
 ---
 
@@ -45,7 +45,7 @@ The site reads Supabase credentials from `config.js`, which is **gitignored and 
 
 ---
 
-## Step 4 — Deploy to Netlify
+## Deploy to Netlify
 
 When you drag-and-drop to **[netlify.com/drop](https://netlify.com/drop)**, include `config.js` in the folder — it's gitignored (not in the repo) but must be present for the site to connect to Supabase.
 
@@ -55,13 +55,7 @@ Done. Your site is live.
 
 ## Editing about text
 
-Open `index.html` and find the comment:
-
-```
-<!-- ===== EDIT YOUR ABOUT TEXT BELOW ===== -->
-```
-
-Replace the paragraph text with your own content.
+Open `index.html` and find `#introAboutPara` inside the `intro-about` section, then replace the paragraph text with your own content.
 
 ---
 

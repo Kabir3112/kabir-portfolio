@@ -15,13 +15,15 @@
    12. Intro about section
    13. Expand button + expandable block
    14. Typography helpers
-   15. Cards grid — dark (Projects)
-   16. Cards grid — light (Certificates)
-   17. Newsletter form
-   18. Footer & links
-   19. FinIQ context overlay
-   20. Responsive (mobile ≤ 767px)
-   21. Reduced motion
+   15. Global action button system
+   16. Cards grid — dark (Projects)
+   17. Cards grid — light (Certificates)
+   18. Newsletter form
+   19. Footer & links
+   20. Contact section
+   21. FinIQ context overlay
+   22. Responsive (mobile ≤ 767px)
+   23. Reduced motion
    ============================================================ */
 
 
@@ -77,6 +79,11 @@ img { display: block; max-width: 100%; }
 a   { color: inherit; text-decoration: none; }
 ul, ol { list-style: none; }
 button { cursor: pointer; border: none; background: none; font: inherit; color: inherit; }
+
+::selection {
+  background: var(--green-light);
+  color: var(--dark);
+}
 
 
 /* ─────────────────────────────────────────────────────────────
@@ -222,9 +229,11 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   text-align: right;
   padding: 0.18rem 0.4rem;
   white-space: nowrap;
-  transition: color 0.25s ease, font-weight 0.25s ease, border-right-color 0.25s ease;
+  transition: color 0.3s ease, font-weight 0.3s ease, border-right-color 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
   border-right: 1.5px solid transparent;
   cursor: pointer;
+  opacity: calc(0.46 + var(--nav-strength, 0) * 0.54);
+  transform: translateX(calc((1 - var(--nav-strength, 0)) * 6px));
 }
 
 .nav-item:hover { color: rgba(237, 234, 222, 0.82); }
@@ -234,6 +243,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   font-weight: 600;
   border-right-color: rgba(237, 234, 222, 0.85);
   animation: navItemPulse 2.8s ease-in-out infinite;
+  transform: translateX(0);
 }
 
 @keyframes navItemPulse {
@@ -328,11 +338,12 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   font-size: clamp(1.4rem, 4.5vw, 1.9rem);
   font-weight: 300;
   color: var(--cream);
-  opacity: 0.4;
+  opacity: calc(0.32 + var(--nav-strength, 0) * 0.68);
   letter-spacing: -0.01em;
   padding: 0.2rem 1.2rem;
-  transition: opacity 0.2s ease, color 0.2s ease;
+  transition: opacity 0.3s ease, color 0.3s ease, transform 0.3s ease;
   touch-action: manipulation;
+  transform: translateY(calc((1 - var(--nav-strength, 0)) * 4px));
 }
 
 .mob-nav-item:hover,
@@ -341,6 +352,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 .mob-nav-item.active {
   opacity: 1;
   color: var(--green-light);
+  transform: translateY(0);
 }
 
 
@@ -355,6 +367,11 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   display: flex;
   align-items: flex-end;
   padding: var(--panel-pad-y) var(--panel-pad-x);
+  transform: perspective(2600px) translate3d(var(--panel-stage-x, 0px), var(--panel-stage-y, 0px), 0) rotateY(var(--panel-stage-rotate, 0deg)) scale(var(--panel-stage-scale, 1));
+  transform-origin: 22% 50%;
+  opacity: var(--panel-stage-opacity, 1);
+  will-change: transform, opacity;
+  transition: transform 0.2s linear, opacity 0.2s linear;
 }
 
 /* Wide variant (projects / certs) */
@@ -373,35 +390,47 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 .panel-inner {
   max-width: var(--content-max);
   width: 100%;
-  opacity: 0;
-  transform: translateY(32px);
-  translate: 0 var(--p-y, 0px);
-  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+  opacity: var(--panel-opacity, 0);
+  transform: translate3d(0, var(--panel-shift-y, 32px), 0) scale(var(--panel-scale, 1));
+  filter: blur(var(--panel-blur, 0px));
+  transform-origin: left bottom;
+  will-change: transform, opacity, filter;
+  transition: opacity 0.2s linear, transform 0.2s linear, filter 0.2s linear;
 }
 
 .panel-inner.in-view {
-  opacity: 1;
-  transform: translateY(0);
+  opacity: var(--panel-opacity, 1);
+  transform: translate3d(0, var(--panel-shift-y, 0px), 0) scale(var(--panel-scale, 1));
 }
 
 .panel-inner--wide { max-width: 100%; }
 
-/* Section meta label */
+/* Section meta label — with editorial rule dash */
 .panel-meta {
   font-family: var(--font-sans);
   font-size: 0.62rem;
-  font-weight: 400;
-  letter-spacing: 0.16em;
+  font-weight: 500;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  opacity: 0.38;
+  opacity: 0.45;
   margin-bottom: 0.9rem;
+}
+.panel-meta::before {
+  content: '';
+  display: inline-block;
+  width: 1.5rem;
+  height: 1px;
+  background: currentColor;
+  vertical-align: middle;
+  margin-right: 0.6rem;
+  opacity: 0.7;
 }
 
 /* Big editorial title */
 .panel-title {
   font-family: var(--font-serif);
   font-size: clamp(3.8rem, 10vw, 11rem);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 0.95;
   letter-spacing: -0.02em;
   margin-bottom: 1.1rem;
@@ -411,10 +440,23 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 .panel-tagline {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+  font-size: clamp(0.98rem, 1.5vw, 1.18rem);
   line-height: 1.55;
-  opacity: 0.55;
+  opacity: 0.66;
   margin-bottom: 2rem;
+}
+
+.text-reveal-line {
+  display: block;
+  overflow: hidden;
+}
+
+.text-reveal-inner {
+  display: block;
+  opacity: var(--line-reveal, 0);
+  transform: translate3d(0, calc((1 - var(--line-reveal, 0)) * 105%), 0);
+  transition: opacity 0.22s linear, transform 0.22s linear;
+  will-change: transform, opacity;
 }
 
 
@@ -429,6 +471,89 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 .story-block > .panel {
   position: sticky;
   top: 0;
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   9b. PANEL MEDIA — polaroid photo collage (right side, desktop)
+   Cards fade/drift in driven by --panel-progress (set by JS on
+   each .panel). Each card is positioned via inline custom props:
+   --x/--y (offsets), --w (width), --tilt, --ar (aspect), --d (delay).
+───────────────────────────────────────────────────────────── */
+.panel-media {
+  position: absolute;
+  right: 6vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(300px, 30vw, 480px);
+  height: min(62vh, 560px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.media-card {
+  position: absolute;
+  left: var(--x, 0%);
+  top: var(--y, 0%);
+  width: var(--w, 60%);
+  margin: 0;
+  background: #fff;
+  padding: 10px 10px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+  opacity: clamp(0, (var(--panel-progress, 1) - var(--d, 0)) * 5, 1);
+  transform:
+    translate3d(0, calc((1 - clamp(0, (var(--panel-progress, 1) - var(--d, 0)) * 3, 1)) * 46px), 0)
+    rotate(var(--tilt, 0deg));
+  transition: opacity 0.2s linear, transform 0.2s linear;
+  will-change: transform, opacity;
+}
+
+.media-card img {
+  width: 100%;
+  aspect-ratio: var(--ar, 4/3);
+  object-fit: cover;
+  display: block;
+  border-radius: 2px;
+}
+
+/* Logo chips — contain instead of cover, breathing room */
+.media-card--logo {
+  padding: clamp(16px, 1.8vw, 26px);
+}
+.media-card--logo img {
+  object-fit: contain;
+}
+
+/* Photo gallery inside "Read more" expandables */
+.expand-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 0.7rem;
+  margin-top: 1.4rem;
+}
+.expand-gallery figure { margin: 0; }
+.expand-gallery img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+.expand-gallery figcaption {
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  margin-top: 0.35rem;
+}
+
+/* Tablet: content needs the full width — hide the collage */
+@media (max-width: 1099px) and (min-width: 768px) {
+  .panel-media { display: none; }
 }
 
 
@@ -448,20 +573,26 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   justify-content: center;
   gap: 2rem;
   opacity: 1 !important;
-  transform: none !important;
+  transform: translate3d(0, var(--hero-avatar-y, 0px), 0) scale(var(--hero-avatar-scale, 1)) !important;
+  transition: transform 0.2s linear, opacity 0.2s linear;
+  opacity: var(--hero-avatar-opacity, 1) !important;
+  pointer-events: none;
 }
 
 .intro-avatar {
   width: clamp(180px, 28vw, 320px);
   perspective: 900px;
   opacity: 0;
-  transform: rotateY(-120deg) scale(0.75);
-  transition: opacity 0.7s var(--ease), transform 1.2s var(--ease);
+  transform: translate3d(var(--avatar-screen-x, 0px), var(--avatar-screen-y, 0px), 0) rotateY(calc(-120deg + var(--hero-avatar-tilt, 0deg))) scale(calc(0.75 * var(--avatar-screen-scale, 1)));
+  transform-origin: center center;
+  transition: opacity 0.7s var(--ease), transform 0.22s linear, filter 0.2s linear;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.22));
+  pointer-events: none;
 }
 
 .intro-avatar.visible {
   opacity: 1;
-  transform: rotateY(0deg) scale(1);
+  transform: translate3d(var(--avatar-screen-x, 0px), var(--avatar-screen-y, 0px), 0) rotateY(var(--hero-avatar-tilt, 0deg)) scale(var(--avatar-screen-scale, 1));
 }
 
 .intro-avatar.visible .avatar-face {
@@ -479,6 +610,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   font-style: italic;
   line-height: 1.1;
   animation: quipFadeUp 1s var(--ease) 0.4s both;
+  opacity: var(--hero-quip-opacity, 1);
+  transition: opacity 0.2s linear;
 }
 
 .quip-line {
@@ -538,6 +671,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   align-items: center;
   gap: 0.8rem;
   pointer-events: none;
+  opacity: var(--hero-indicator-opacity, 1);
+  transition: opacity 0.2s linear;
 }
 
 .scroll-indicator__label {
@@ -629,22 +764,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
-
-.about-photo {
-  width: clamp(260px, 33%, 500px);
-  flex-shrink: 0;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateX(40px);
-  transition: opacity 0.9s var(--ease) 0.3s, transform 0.9s var(--ease) 0.3s;
-}
-.about-photo.visible { opacity: 1; transform: translateX(0); }
-.about-photo img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  object-position: center top;
-  display: block;
+  opacity: var(--about-opacity, 0);
+  transform: translate3d(0, var(--about-shift-y, 52px), 0);
+  transition: opacity 0.2s linear, transform 0.2s linear;
+  max-width: 100%;
 }
 
 .intro-greeting {
@@ -661,7 +784,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 .intro-name {
   font-family: var(--font-serif);
   font-size: clamp(4rem, 10vw, 9.5rem);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 0.92;
   letter-spacing: -0.02em;
   display: flex;
@@ -673,7 +796,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 .name-line {
   display: block;
   opacity: 0;
-  transform: translateY(110%);
+  transform: none;
   transition: opacity 0.7s var(--ease), transform 0.8s var(--ease);
 }
 .name-line.visible { opacity: 1; transform: translateY(0); }
@@ -971,6 +1094,13 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   width: 100%;
 }
 
+.cards-grid .tl-card {
+  opacity: var(--card-opacity, 1);
+  transform: perspective(1200px) translate3d(0, var(--card-y, 0px), 0) rotateX(var(--card-rotate, 0deg)) scale(var(--card-scale, 1));
+  transform-origin: center bottom;
+  will-change: transform, opacity;
+}
+
 .cards-grid--dark .tl-card {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.08);
@@ -979,10 +1109,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
-  transition: transform 0.35s var(--ease), border-color 0.3s ease, background 0.3s ease;
+  transition: transform 0.35s var(--ease), border-color 0.3s ease, background 0.3s ease, opacity 0.25s linear;
 }
 .cards-grid--dark .tl-card:hover {
-  transform: translateY(-4px);
+  transform: translate3d(0, calc(var(--card-y, 0px) - 4px), 0) scale(var(--card-scale, 1)) rotateX(var(--card-rotate, 0deg));
   background: rgba(255,255,255,0.07);
   border-color: rgba(255,255,255,0.15);
 }
@@ -1012,7 +1142,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
 
 /* ─────────────────────────────────────────────────────────────
-   16. CARDS GRID — LIGHT (Certificates)
+   17. CARDS GRID — LIGHT (Certificates)
 ───────────────────────────────────────────────────────────── */
 .cards-grid--light .tl-card {
   background: #fff;
@@ -1020,11 +1150,11 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   border-radius: 8px;
   padding: 1.6rem;
   display: flex; flex-direction: column; gap: 0.55rem;
-  transition: transform 0.35s var(--ease), box-shadow 0.3s ease;
+  transition: transform 0.35s var(--ease), box-shadow 0.3s ease, opacity 0.25s linear;
   color: var(--dark);
 }
 .cards-grid--light .tl-card:hover {
-  transform: translateY(-4px);
+  transform: translate3d(0, calc(var(--card-y, 0px) - 4px), 0) scale(var(--card-scale, 1)) rotateX(var(--card-rotate, 0deg));
   box-shadow: 0 10px 36px rgba(0,0,0,0.08);
 }
 .cards-grid--light .tl-card .card-title {
@@ -1052,7 +1182,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
 
 /* ─────────────────────────────────────────────────────────────
-   17. NEWSLETTER FORM
+   18. NEWSLETTER FORM
 ───────────────────────────────────────────────────────────── */
 /* Large launch date — replaces the small panel-meta */
 .newsletter-launch-date {
@@ -1118,7 +1248,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
 
 /* ─────────────────────────────────────────────────────────────
-   18. FOOTER & LINKS
+   19. FOOTER & LINKS
 ───────────────────────────────────────────────────────────── */
 .footer-links {
   display: flex; align-items: center; gap: 0.75rem;
@@ -1141,7 +1271,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
 
 /* ─────────────────────────────────────────────────────────────
-   19. CONTACT SECTION
+   20. CONTACT SECTION
 ───────────────────────────────────────────────────────────── */
 .contact-layout {
   display: flex;
@@ -1339,7 +1469,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
 
 /* ─────────────────────────────────────────────────────────────
-   20. FINIQ CONTEXT OVERLAY
+   21. FINIQ CONTEXT OVERLAY
 ───────────────────────────────────────────────────────────── */
 #finiq-overlay {
   position: fixed;
@@ -1400,7 +1530,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
 
 /* ─────────────────────────────────────────────────────────────
-   20. RESPONSIVE — MOBILE ≤ 767px
+   22. RESPONSIVE — MOBILE ≤ 767px
 ───────────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
   /* Show hamburger, hide desktop nav */
@@ -1431,17 +1561,11 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
     padding: 5vh 6vw 3vh;
     justify-content: flex-start;
     padding-top: max(5vh, 3.5rem);
+    max-width: 100%;
   }
 
   /* Compact name on mobile */
   .intro-name { font-size: clamp(3rem, 11vw, 5rem); }
-
-  .about-photo {
-    width: 100%;
-    height: 36vh;
-    flex-shrink: 0;
-    transform: none;
-  }
 
   /* Hide loading bar countdown on mobile — auto-scroll is desktop-oriented */
   .about-loading { display: none; }
@@ -1465,6 +1589,52 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
   /* Scroll indicator centred under avatar */
   .scroll-indicator { bottom: 2rem; }
+
+  /* Story panels: allow internal scroll when expanded content overflows.
+     margin-top:auto keeps content bottom-anchored when it fits, but
+     unlike align-items:flex-end it stays reachable when it overflows.
+     Scoped to story-block panels — hero/about/wide panels manage their own layout. */
+  .story-block .panel:not(.panel--wide) {
+    overflow-y: auto;
+    align-items: flex-start;
+  }
+  .story-block .panel:not(.panel--wide) .panel-inner { margin-top: auto; }
+
+  /* Panel media — compact strip pinned to the top of the panel */
+  .panel-media {
+    top: calc(var(--panel-pad-y) + 2.5rem);
+    left: var(--panel-pad-x);
+    right: auto;
+    transform: none;
+    width: auto;
+    height: auto;
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+  }
+  .media-card {
+    position: static;
+    width: auto;
+    padding: 4px 4px 6px;
+    border-radius: 4px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+  }
+  .media-card img {
+    height: 64px;
+    width: auto;
+  }
+  /* Keep the strip to two cards on small screens */
+  .panel-media .media-card:nth-child(n+3) { display: none; }
+
+  /* Fade the strip out while a "Read more" block is open —
+     expanded content grows upward into the strip's space */
+  .panel:has(.expandable.open) .panel-media {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .expand-gallery { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
 }
 
 /* Slightly larger breakpoint for tablets */
@@ -1475,7 +1645,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
 
 /* ─────────────────────────────────────────────────────────────
-   21. REDUCED MOTION
+   23. REDUCED MOTION
 ───────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -1483,10 +1653,20 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .panel-inner, .intro-avatar, .name-line,
-  .intro-subtitle, .intro-about-para, .about-photo {
-    opacity: 1; transform: none;
+  .panel {
+    transform: none !important;
+    opacity: 1 !important;
   }
+  .panel-inner, .intro-avatar, .name-line,
+  .intro-subtitle, .intro-about-para {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .panel-inner { transform: none !important; }
+  .text-reveal-inner { opacity: 1; transform: none; }
+  .cards-grid .tl-card { opacity: 1; transform: none; }
+  .media-card { opacity: 1; transform: rotate(var(--tilt, 0deg)); }
   #underline-path { stroke-dashoffset: 0; }
   .scroll-indicator__chevron { animation: none; opacity: 0.7; }
   .scroll-indicator__arrow::before,
