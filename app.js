@@ -682,6 +682,19 @@ function initFiniqOverlay() {
    11. SUPABASE — LOAD PROJECTS
 ───────────────────────────────────────────────────────────── */
 
+/* ── THE ONLY PLACE YOU EDIT URLS ──────────────────────────────
+   Paste the public Supabase Storage URL for each file here. These
+   keep the buttons alive when the Supabase query fails (free-tier
+   projects pause after ~7 days idle), because Storage is served
+   over the CDN and stays up even when the database is asleep.
+   Use the same URLs in the `update` statements in supabase.sql. */
+const PDF = {
+  aiFluency:              '',
+  designSprint:           '',
+  microInternship:        '',
+  ticketspherePrototype:  ''
+};
+
 /* Static fallback content, shown when Supabase is unreachable
    (e.g. the free-tier project is paused). Keep in sync with
    the seed data in supabase.sql. */
@@ -689,19 +702,46 @@ const FALLBACK_PROJECTS = [
   {
     title: 'TicketSphere',
     description: 'A digital ticketing platform designed and built during an intensive one-week design sprint at King’s Business School. Taken from concept to a live website and app prototype in five days. Awarded 2nd place for best website and app by students and industry panellists.',
-    project_url: 'https://v0-ticketsphere.vercel.app'
+    project_url: 'https://v0-ticketsphere.vercel.app',
+    prototype_url: PDF.ticketspherePrototype,
+    certificate_url: ''
   },
   {
     title: 'KBS Micro Internship: Jobago AI',
-    description: 'Student consultant on a 3-week industry project through King’s Business School. Researched megatrends relevant to Jobago AI, an AI-powered hiring and job-matching platform, and delivered strategic recommendations to the client.'
+    description: 'Student consultant on a 3-week industry project through King’s Business School. Researched megatrends relevant to Jobago AI, an AI-powered hiring and job-matching platform, and delivered strategic recommendations to the client.',
+    project_url: '',
+    prototype_url: '',
+    certificate_url: PDF.microInternship
   }
 ];
 
+/* Shown when the Supabase query fails. */
 const FALLBACK_CERTS = [
-  { title: 'AI Fluency: Foundation & Framework', issuer: 'Anthropic' },
-  { title: 'Design Sprint', issuer: 'King’s College London' },
-  { title: 'King’s Business School Micro Internship', issuer: 'King’s College London' }
+  { title: 'AI Fluency: Foundation & Framework',       issuer: 'Anthropic',              pdf_url: PDF.aiFluency },
+  { title: 'Design Sprint',                            issuer: 'King’s College London',  pdf_url: PDF.designSprint },
+  { title: 'King’s Business School Micro Internship',  issuer: 'King’s College London',  pdf_url: PDF.microInternship }
 ];
+
+/* Every URL column the card builders read. These button URLs have silently
+   vanished twice because app.js was updated to read a column that supabase.sql
+   never created, so the lookup returned undefined and the button was skipped
+   with no error. This logs the mismatch instead of rendering a blank card. */
+const EXPECTED_COLUMNS = {
+  projects:     ['project_url', 'prototype_url', 'certificate_url'],
+  certificates: ['pdf_url', 'link']
+};
+
+function checkColumns(table, rows) {
+  if (!rows || !rows.length) return;
+  const present = Object.keys(rows[0]);
+  const missing = EXPECTED_COLUMNS[table].filter(col => !present.includes(col));
+  if (missing.length) {
+    console.warn(
+      `Schema drift: the "${table}" table is missing ${missing.join(', ')}. ` +
+      `Run the "alter table" lines in supabase.sql — buttons using these will not render.`
+    );
+  }
+}
 
 async function loadProjects() {
   const container = document.getElementById('projectsContainer');
@@ -720,23 +760,29 @@ async function loadProjects() {
       prepareCardMotion(container);
       return;
     }
+    checkColumns('projects', data);
     container.innerHTML = data.map(buildProjectCard).join('');
     prepareCardMotion(container);
     updateParallax();
+    window.railRemeasure?.();
   } catch (err) {
     console.warn('Projects: Supabase unreachable, showing fallback content.', err);
     container.innerHTML = FALLBACK_PROJECTS.map(buildProjectCard).join('');
     prepareCardMotion(container);
     updateParallax();
+    window.railRemeasure?.();
   }
 }
 
 function buildProjectCard(p) {
-  const title        = escapeHtml(p.title         || 'Untitled Project');
+  const rawTitle     = p.title || 'Untitled Project';
+  const title        = escapeHtml(rawTitle);
   const desc         = escapeHtml(p.description   || '');
   const websiteUrl   = escapeHtml(p.project_url   || '');
   const prototypeUrl = escapeHtml(p.prototype_url || '');
   const badgeUrl     = escapeHtml(p.badge_url     || '');
+  /* Some projects deliver a certificate rather than a live build. */
+  const rawCertPdf   = p.certificate_url || '';
 
   let tagsHtml = '';
   if (p.tags) {
@@ -785,6 +831,11 @@ function buildProjectCard(p) {
     </a>`);
   }
 
+  /* Certificate buttons are primary only when there is no website to lead with. */
+  if (rawCertPdf) {
+    actions.push(...certActions(rawCertPdf, '', rawTitle, websiteUrl ? 'ghost' : 'primary'));
+  }
+
   const actionsHtml = actions.length
     ? `<div class="card-actions">${actions.join('')}</div>`
     : '';
@@ -819,26 +870,59 @@ async function loadCertificates() {
       prepareCardMotion(container);
       return;
     }
+    checkColumns('certificates', data);
     container.innerHTML = data.map(buildCertCard).join('');
     prepareCardMotion(container);
     updateParallax();
+    window.railRemeasure?.();
   } catch (err) {
     console.warn('Certificates: Supabase unreachable, showing fallback content.', err);
     container.innerHTML = FALLBACK_CERTS.map(buildCertCard).join('');
     prepareCardMotion(container);
     updateParallax();
+    window.railRemeasure?.();
   }
 }
 
+/* Certificate button. Shared by the Certificates section and by project
+   cards whose deliverable is a certificate, so the two can never drift
+   apart. `fallbackUrl` is an issuer verification page, used when there is
+   no PDF to serve. One button only: the browser's own PDF viewer already
+   offers a download, so a second button would be redundant. */
+function certActions(rawPdf, fallbackUrl, rawTitle, variant) {
+  const title   = escapeHtml(rawTitle);
+  const viewUrl = escapeHtml(rawPdf || fallbackUrl || '');
+  const out     = [];
+
+  if (viewUrl) {
+    out.push(`<a href="${viewUrl}" class="action-btn action-btn--${variant}"
+        target="_blank" rel="noopener noreferrer" aria-label="View ${title} certificate">
+      <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="12" height="9" rx="1" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M5 14l3-1.8 3 1.8v-3H5v3z"
+          stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      View Certificate
+    </a>`);
+  }
+
+  return out;
+}
+
 function buildCertCard(c) {
-  const title    = escapeHtml(c.title     || c.name  || 'Certificate');
+  const rawTitle = c.title    || c.name || 'Certificate';
+  const rawPdf   = c.pdf_url  || c.file_url || '';
+  const rawCert  = c.cert_url || c.url  || c.link || '';
+
+  const title    = escapeHtml(rawTitle);
   const issuer   = escapeHtml(c.issuer    || c.org   || '');
   const badgeUrl = escapeHtml(c.badge_url || c.badge || '');
-  const certUrl  = escapeHtml(c.cert_url  || c.url   || c.link || '');
-  const pdfUrl   = escapeHtml(c.pdf_url   || '');
 
+  /* Deliberately NOT falling back to created_at: that is when the row was
+     added to Supabase, not when the certificate was earned, so showing it
+     puts a wrong date on the card. Only a real issue date is displayed. */
   let dateHtml = '';
-  const rawDate = c.issued_at || c.date || c.created_at;
+  const rawDate = c.issued_at || c.date;
   if (rawDate) {
     try {
       const d = new Date(rawDate);
@@ -851,32 +935,7 @@ function buildCertCard(c) {
     : '';
 
   /* Build action buttons — only render buttons that have a URL */
-  const actions = [];
-
-  if (certUrl) {
-    actions.push(`<a href="${certUrl}" class="action-btn action-btn--primary"
-        target="_blank" rel="noopener noreferrer" aria-label="View ${title} certificate">
-      <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-        <rect x="2" y="2" width="12" height="9" rx="1" stroke="currentColor" stroke-width="1.4"/>
-        <path d="M5 14l3-1.8 3 1.8v-3H5v3z"
-          stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
-      </svg>
-      View Certificate
-    </a>`);
-  }
-
-  if (pdfUrl) {
-    actions.push(`<a href="${pdfUrl}" class="action-btn action-btn--ghost"
-        target="_blank" rel="noopener noreferrer" aria-label="Open ${title} PDF">
-      <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-        <path d="M9.5 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V5.5L9.5 2z"
-          stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-        <path d="M9.5 2v3.5H13M5.5 9.5h5M5.5 11.5h3.5"
-          stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-      </svg>
-      Open PDF
-    </a>`);
-  }
+  const actions = certActions(rawPdf, rawCert, rawTitle, 'primary');
 
   const actionsHtml = actions.length
     ? `<div class="card-actions">${actions.join('')}</div>`
@@ -1054,26 +1113,23 @@ function initNewsletterForm() {
     setLoading(true);
     showMessage('', '');
 
+    /* No lookup before inserting: RLS deliberately grants insert-only on
+       this table, so a SELECT would always come back empty and let the
+       subscriber list stay private. The unique constraint on `email` is
+       what detects a repeat signup — Postgres reports it as 23505. */
     try {
-      const { data: existing, error: checkErr } = await db
-        .from('newsletter_subscribers')
-        .select('email')
-        .eq('email', email)
-        .maybeSingle();
-
-      if (checkErr) throw checkErr;
-
-      if (existing) {
-        showMessage("You're already subscribed. Thanks for the enthusiasm 🙌", 'info');
-        setLoading(false);
-        return;
-      }
-
       const { error: insertErr } = await db
         .from('newsletter_subscribers')
         .insert([{ email }]);
 
-      if (insertErr) throw insertErr;
+      if (insertErr) {
+        if (insertErr.code === '23505') {
+          showMessage("You're already subscribed. Thanks for the enthusiasm 🙌", 'info');
+          form.reset();
+          return;
+        }
+        throw insertErr;
+      }
 
       showMessage("You're in! I'll email you the moment the first issue drops. 🚀", 'success');
       form.reset();
