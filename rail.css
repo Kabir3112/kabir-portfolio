@@ -1,0 +1,221 @@
+/* ═══════════════════════════════════════════════════════════════
+   HORIZONTAL LIFE-TIMELINE ("the rail")
+
+   Vertical wheel input drives horizontal travel: the story moves
+   sideways like a train journey, each section a station.
+
+   Everything here is scoped to body.rail-mode, which rail.js only
+   applies on wide viewports without prefers-reduced-motion. On
+   phones and for reduced-motion users the class is never added and
+   the original vertical engine renders untouched.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Scroll driver ──────────────────────────────────────────────
+   #panels-wrap keeps its tall height so the page still scrolls
+   normally — wheel, trackpad, keyboard, scrollbar and find-in-page
+   all keep working. Only the *painting* is horizontal. */
+.rail-mode #panels-wrap { position: relative; }
+
+/* Height set by rail.js = horizontal distance + one screen. */
+.rail-driver { position: relative; }
+
+.rail-mode .rail-viewport {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.rail-mode .rail-track {
+  display: flex;
+  height: 100vh;
+  will-change: transform;
+  transform: translate3d(var(--rail-x, 0px), 0, 0);
+}
+
+/* ── Stations ───────────────────────────────────────────────────
+   Uniform dwell by construction: every station is exactly one
+   screen wide, so equal wheel distance always buys equal content.
+   Card-heavy sections get two screens of *width* — never extra
+   scroll-per-pixel, so the travel speed stays constant. */
+.rail-mode .story-block {
+  position: static;
+  height: 100vh !important;
+  flex: 0 0 100vw;
+  width: 100vw;
+}
+
+.rail-mode .story-block[data-rail-wide="true"] {
+  flex: 0 0 200vw;
+  width: 200vw;
+}
+
+.rail-mode .story-block > .panel {
+  position: static;
+  height: 100vh;
+  width: 100%;
+  /* The vertical engine's stage transforms would fight translateX. */
+  transform: none;
+  opacity: 1;
+}
+
+.rail-mode .panel-inner {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Depth: stations drift slightly as they cross the screen ─────
+   --station-focus is 0 at the edges, 1 when centred. This is the
+   only parallax kept — it reads as looking out of a train window. */
+.rail-mode .panel-inner {
+  transition: opacity 0.4s ease-out;
+  opacity: calc(0.35 + 0.65 * var(--station-focus, 1));
+}
+
+.rail-mode .panel-media {
+  transform: translateX(calc((1 - var(--station-focus, 1)) * 3vw));
+  transition: transform 0.5s ease-out;
+}
+
+/* ── The track: station markers along the bottom ────────────────── */
+.rail-track-ui {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 78px;
+  z-index: 60;
+  pointer-events: none;
+  display: none;
+  align-items: center;
+  padding: 0 6vw;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent);
+}
+
+.rail-mode .rail-track-ui { display: flex; }
+
+/* The rail line itself */
+.rail-line {
+  position: absolute;
+  left: 6vw;
+  right: 6vw;
+  top: 34px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Travelled portion, filled as you progress */
+.rail-line-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: var(--rail-progress, 0%);
+  background: var(--green-light, #7a9a6a);
+  transition: width 0.1s linear;
+}
+
+.rail-stations {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  pointer-events: auto;
+}
+
+.rail-station {
+  position: relative;
+  background: none;
+  border: 0;
+  padding: 26px 0 0;
+  cursor: pointer;
+  font-family: var(--font-sans, sans-serif);
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+  transition: color 0.25s ease;
+  flex: 1;
+  text-align: center;
+}
+
+/* The station dot, sitting on the line */
+.rail-station::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin-left: -3.5px;
+  border-radius: 50%;
+  background: var(--dark, #141414);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  transition: all 0.25s ease;
+}
+
+.rail-station:hover { color: rgba(255, 255, 255, 0.8); }
+
+.rail-station[aria-current="true"] {
+  color: #fff;
+}
+
+.rail-station[aria-current="true"]::before {
+  background: var(--green-light, #7a9a6a);
+  border-color: var(--green-light, #7a9a6a);
+  transform: scale(1.6);
+}
+
+.rail-station:focus-visible {
+  outline: 2px solid var(--green-light, #7a9a6a);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+
+/* Hide the station labels when they'd collide on smaller desktops */
+@media (max-width: 1100px) {
+  .rail-station { font-size: 0; padding-top: 20px; }
+  .rail-track-ui { height: 56px; }
+}
+
+/* ── Redundant chrome in rail mode ──────────────────────────────
+   The rail replaces the vertical progress bar and side nav. */
+.rail-mode #progressBar,
+.rail-mode #side-nav { display: none; }
+
+/* Card sections scroll their overflow vertically inside the station */
+.rail-mode .panel--wide { overflow-y: auto; }
+
+/* Wheel hint, shown briefly on arrival so the sideways motion isn't
+   a surprise. Removed permanently after the first scroll. */
+.rail-hint {
+  position: fixed;
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 61;
+  font-family: var(--font-sans, sans-serif);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  pointer-events: none;
+  animation: railHintIn 0.6s ease-out both;
+}
+
+.rail-hint.is-gone {
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+}
+
+@keyframes railHintIn {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-hint { animation: none; }
+}
