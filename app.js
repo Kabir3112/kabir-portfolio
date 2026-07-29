@@ -47,22 +47,34 @@ let aboutSequenceStarted = false;
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+/* Dwell — how far you scroll while a section is pinned — is deliberately
+   NOT listed per section any more. It used to be hand-tuned here and had
+   drifted to a 2.7x spread (Projects held for 335vh, Personal for 124vh),
+   so identical wheel movement bought wildly different amounts of content
+   and the page felt like it stalled on the card sections.
+
+   setStoryBlockHeights() now gives every section the same base dwell and
+   adds room to card sections only when their content actually overflows,
+   measured at runtime. `depth` and `textLead` stay per-section because
+   those are motion character, not pacing. */
+const BASE_DWELL_VH = 55;
+
 const SECTION_MOTION = {
   'intro-avatar':       { hero: true, depth: 10 },
   'intro-about':        { hero: true, depth: 10 },
-  'childhood':          { extraVh: 26, depth: 10, textLead: 0.02 },
-  'early-spark':        { extraVh: 26, depth: 10, textLead: 0.03 },
-  'christ':             { extraVh: 26, depth: 10, textLead: 0.03 },
-  'finiq':              { extraVh: 88, depth: 16, textLead: 0.00 },
-  'why-msc':            { extraVh: 78, depth: 14, textLead: 0.01 },
-  'kings':              { extraVh: 34, depth: 10, textLead: 0.03 },
-  'dissertation':       { extraVh: 40, depth: 10, textLead: 0.03 },
-  'ai-interest':        { extraVh: 38, depth: 10, textLead: 0.02 },
-  'personal':           { extraVh: 24, depth: 8, textLead: 0.04 },
-  'projects':           { extraVh: 235, depth: 16, textLead: 0.00, cards: true },
-  'certificates':       { extraVh: 220, depth: 14, textLead: 0.00, cards: true },
-  'newsletter-section': { extraVh: 235, depth: 14, textLead: 0.00 },
-  'contact':            { extraVh: 62, depth: 8, textLead: 0.02 },
+  'childhood':          { depth: 10, textLead: 0.02 },
+  'early-spark':        { depth: 10, textLead: 0.03 },
+  'christ':             { depth: 10, textLead: 0.03 },
+  'finiq':              { depth: 16, textLead: 0.00 },
+  'why-msc':            { depth: 14, textLead: 0.01 },
+  'kings':              { depth: 10, textLead: 0.03 },
+  'dissertation':       { depth: 10, textLead: 0.03 },
+  'ai-interest':        { depth: 10, textLead: 0.02 },
+  'personal':           { depth: 8,  textLead: 0.04 },
+  'projects':           { depth: 16, textLead: 0.00, cards: true },
+  'certificates':       { depth: 14, textLead: 0.00, cards: true },
+  'newsletter-section': { depth: 14, textLead: 0.00 },
+  'contact':            { depth: 8,  textLead: 0.02 },
 };
 
 // Auto-scroll state — set to true the moment user touches scroll input
@@ -176,17 +188,44 @@ function prepareCardMotion(container) {
      - Remaining 88 % = smooth bottom-to-top image reveal
 ───────────────────────────────────────────────────────────── */
 
-/** Set inline heights on all story-blocks based on data-extra-vh */
+/**
+ * Set story-block heights, which is what controls scroll pacing.
+ *
+ * Every section gets the same BASE_DWELL_VH so equal wheel movement
+ * always buys equal content. A card section gets extra room only if
+ * its content genuinely overflows the viewport — measured here rather
+ * than guessed — so it holds for exactly as long as it needs and no
+ * longer. This is what removes the "stalling" on Projects/Certificates.
+ *
+ * `data-extra-vh` in the markup is still honoured as a deliberate
+ * author override, but nothing relies on it for normal pacing.
+ */
 function setStoryBlockHeights() {
+  /* Heights below are written in `vh`, so the overflow must be converted
+     against the same reference the CSS unit uses. On mobile the visual
+     viewport (window.innerHeight) and the CSS vh reference disagree —
+     measured 992 vs 812 on a phone — which would scale the added room
+     wrongly. documentElement.clientHeight tracks the CSS unit. */
+  const vh = document.documentElement.clientHeight || window.innerHeight;
+
   document.querySelectorAll('.story-block').forEach(block => {
     const panel = block.querySelector('.panel');
-    const motion = panel ? getSectionMotion(panel.id) : {};
-    const declared = block.dataset.extraVh !== undefined && block.dataset.extraVh !== ''
-      ? parseFloat(block.dataset.extraVh)
-      : NaN;
-    const extra = Number.isFinite(declared)
-      ? Math.max(declared, motion.extraVh ?? declared)
-      : (motion.extraVh ?? 150);
+    if (!panel) return;
+
+    let extra = BASE_DWELL_VH;
+
+    // Card sections: add only the overflow they actually have.
+    const inner = panel.querySelector('.panel-inner');
+    if (inner) {
+      const overflow = inner.scrollHeight - panel.clientHeight;
+      if (overflow > 0) extra += Math.ceil((overflow / vh) * 100);
+    }
+
+    // Explicit override wins, but only upward — never shorten a section
+    // below the room its own content needs.
+    const declared = parseFloat(block.dataset.extraVh);
+    if (Number.isFinite(declared)) extra = Math.max(extra, declared);
+
     block.style.height = `${100 + extra}vh`;
   });
 }
