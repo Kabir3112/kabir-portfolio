@@ -728,10 +728,10 @@ function initFiniqOverlay() {
    over the CDN and stays up even when the database is asleep.
    Use the same URLs in the `update` statements in supabase.sql. */
 const PDF = {
-  aiFluency:              '',
-  designSprint:           '',
-  microInternship:        '',
-  ticketspherePrototype:  ''
+  aiFluency:              'https://gnfqwqiegsdralfxzymn.supabase.co/storage/v1/object/public/Assets/certificates/anthropic-ai-fluency.pdf',
+  designSprint:           'https://gnfqwqiegsdralfxzymn.supabase.co/storage/v1/object/public/Assets/certificates/design-sprint.pdf',
+  microInternship:        'https://gnfqwqiegsdralfxzymn.supabase.co/storage/v1/object/public/Assets/certificates/kbs-micro-internship.pdf',
+  ticketspherePrototype:  'https://ticketsphere.figma.site'
 };
 
 /* Static fallback content, shown when Supabase is unreachable
