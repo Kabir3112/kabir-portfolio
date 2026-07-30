@@ -998,36 +998,36 @@ function buildCertCard(c) {
    Minor / accidental scrolls that stay within About are ignored.
 ───────────────────────────────────────────────────────────── */
 function initAutoScrollGuard() {
-  function checkScrollDepth() {
-    if (autoScrollCancelled) {
-      window.removeEventListener('scroll', checkScrollDepth);
-      return;
-    }
+  /* Cancel on the first sign of deliberate user input.
 
-    // Build a scroll-position-sorted list of [id, top] pairs
-    const sorted = [...sectionScrollTops.entries()]
-      .sort((a, b) => a[1] - b[1]);
+     This used to cancel only once the reader had scrolled 50% into the
+     section AFTER About, which meant the sole way to keep reading About
+     was to leave it — anyone who stopped to actually read got yanked to
+     FinIQ mid-sentence, and the panel looked broken. Auto-advance is for
+     a visitor who is not engaging; the moment someone scrolls, they are.
 
-    const aboutIdx = sorted.findIndex(([id]) => id === 'intro-about');
-    if (aboutIdx === -1 || aboutIdx >= sorted.length - 1) return;
+     These listen for user intent (wheel, touch, keys) rather than the
+     `scroll` event, because `scroll` also fires for the auto-scroll's own
+     smooth animation and for programmatic nav jumps. */
+  const INTENT_KEYS = new Set([
+    'ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ', 'Spacebar'
+  ]);
 
-    const [, nextTop]  = sorted[aboutIdx + 1];
-    const nextNextEntry = sorted[aboutIdx + 2];
-    // Height of the next section = distance to the section after it
-    const nextHeight   = nextNextEntry
-      ? nextNextEntry[1] - nextTop
-      : window.innerHeight;
-
-    // Progress 0→1 through the next section
-    const progress = (window.scrollY - nextTop) / nextHeight;
-
-    if (progress >= 0.5) {
-      cancelAutoScroll();
-      window.removeEventListener('scroll', checkScrollDepth);
-    }
+  function onIntent(e) {
+    if (e.type === 'keydown' && !INTENT_KEYS.has(e.key)) return;
+    cancelAutoScroll();
+    teardown();
   }
 
-  window.addEventListener('scroll', checkScrollDepth, { passive: true });
+  function teardown() {
+    window.removeEventListener('wheel', onIntent);
+    window.removeEventListener('touchstart', onIntent);
+    window.removeEventListener('keydown', onIntent);
+  }
+
+  window.addEventListener('wheel', onIntent, { passive: true });
+  window.addEventListener('touchstart', onIntent, { passive: true });
+  window.addEventListener('keydown', onIntent);
 }
 
 /* ─────────────────────────────────────────────────────────────
