@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kabir Mehta | Portfolio</title>
-  <meta name="description" content="Kabir Mehta · MSc King's College London · Ex-FinIQ · AI Curious" />
+  <title>Kabir Mehta | MSc King's College London · FinTech &amp; AI</title>
+  <meta name="description" content="Kabir Mehta — MSc Management &amp; Technological Change at King's College London. Two years delivering structured products at FinIQ. Researching how AI reshapes authority inside organisations." />
   <meta name="theme-color" content="#111111" />
 
   <!-- Favicon — inline SVG monogram, no binary asset needed -->
@@ -12,12 +12,12 @@
 
   <!-- Open Graph / social sharing -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Kabir Mehta | Portfolio" />
-  <meta property="og:description" content="MSc King's College London · Ex-FinIQ · AI Curious" />
+  <meta property="og:title" content="Kabir Mehta | MSc King's College London · FinTech &amp; AI" />
+  <meta property="og:description" content="Two years delivering structured products at FinIQ. Now researching how AI reshapes authority inside organisations." />
   <meta property="og:image" content="images/avatar.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Kabir Mehta | Portfolio" />
-  <meta name="twitter:description" content="MSc King's College London · Ex-FinIQ · AI Curious" />
+  <meta name="twitter:title" content="Kabir Mehta | MSc King's College London · FinTech &amp; AI" />
+  <meta name="twitter:description" content="Two years delivering structured products at FinIQ. Now researching how AI reshapes authority inside organisations." />
   <meta name="twitter:image" content="images/avatar.png" />
 
   <!-- Google Fonts: Cormorant Garamond + DM Sans -->
@@ -39,6 +39,9 @@
   <!-- Progress bar -->
   <div id="progress-bar" aria-hidden="true"></div>
 
+  <!-- Keyboard escape hatch — first tab stop, jumps past the narrative -->
+  <a href="#projects" class="skip-link">Skip to my work</a>
+
   <!-- ═══════════════════════════════════════════════════
        HAMBURGER — mobile only
   ═══════════════════════════════════════════════════ -->
@@ -53,42 +56,34 @@
   ═══════════════════════════════════════════════════ -->
   <nav id="mob-nav" aria-hidden="true" aria-label="Section navigation">
     <ul class="mob-nav-list">
-      <li><button class="mob-nav-item active" data-target="intro-avatar">Intro</button></li>
-      <li><button class="mob-nav-item" data-target="intro-about">About</button></li>
-      <li><button class="mob-nav-item" data-target="childhood">Younger Me</button></li>
-      <li><button class="mob-nav-item" data-target="early-spark">Early Spark</button></li>
-      <li><button class="mob-nav-item" data-target="christ">Christ Uni</button></li>
-      <li><button class="mob-nav-item" data-target="finiq">FinIQ</button></li>
-      <li><button class="mob-nav-item" data-target="why-msc">London Move</button></li>
-      <li><button class="mob-nav-item" data-target="kings">King's</button></li>
-      <li><button class="mob-nav-item" data-target="dissertation">Dissertation</button></li>
-      <li><button class="mob-nav-item" data-target="ai-interest">AI</button></li>
-      <li><button class="mob-nav-item" data-target="personal">Personal</button></li>
+      <li><button class="mob-nav-item active" data-target="hero">Home</button></li>
+      <li><button class="mob-nav-item" data-target="kings">Now</button></li>
+      <li><button class="mob-nav-item" data-target="certificates">Certificates</button></li>
       <li><button class="mob-nav-item" data-target="projects">Projects</button></li>
-      <li><button class="mob-nav-item" data-target="certificates">Certs</button></li>
+      <li><button class="mob-nav-item" data-target="dissertation">Research</button></li>
+      <li><button class="mob-nav-item" data-target="finiq">FinIQ</button></li>
+      <li><button class="mob-nav-item" data-target="christ">Christ Uni</button></li>
+      <li><button class="mob-nav-item" data-target="childhood">Early Years</button></li>
+      <li><button class="mob-nav-item" data-target="personal">Personal</button></li>
       <li><button class="mob-nav-item" data-target="newsletter-section">Newsletter</button></li>
       <li><button class="mob-nav-item" data-target="contact">Contact</button></li>
     </ul>
   </nav>
 
   <!-- ═══════════════════════════════════════════════════
-       DESKTOP TIMELINE NAV — right side
+       DESKTOP TIMELINE NAV — right side, always visible
   ═══════════════════════════════════════════════════ -->
   <nav id="side-nav" aria-label="Section navigation">
     <ul>
-      <li><button class="nav-item active" data-target="intro-avatar">Intro</button></li>
-      <li><button class="nav-item" data-target="intro-about">About</button></li>
-      <li><button class="nav-item" data-target="childhood">Younger Me</button></li>
-      <li><button class="nav-item" data-target="early-spark">Early Spark</button></li>
-      <li><button class="nav-item" data-target="christ">Christ Uni</button></li>
-      <li><button class="nav-item" data-target="finiq">FinIQ</button></li>
-      <li><button class="nav-item" data-target="why-msc">London Move</button></li>
-      <li><button class="nav-item" data-target="kings">King's</button></li>
-      <li><button class="nav-item" data-target="dissertation">Dissertation</button></li>
-      <li><button class="nav-item" data-target="ai-interest">AI</button></li>
-      <li><button class="nav-item" data-target="personal">Personal</button></li>
+      <li><button class="nav-item active" data-target="hero">Home</button></li>
+      <li><button class="nav-item" data-target="kings">Now</button></li>
+      <li><button class="nav-item" data-target="certificates">Certificates</button></li>
       <li><button class="nav-item" data-target="projects">Projects</button></li>
-      <li><button class="nav-item" data-target="certificates">Certs</button></li>
+      <li><button class="nav-item" data-target="dissertation">Research</button></li>
+      <li><button class="nav-item" data-target="finiq">FinIQ</button></li>
+      <li><button class="nav-item" data-target="christ">Christ Uni</button></li>
+      <li><button class="nav-item" data-target="childhood">Early Years</button></li>
+      <li><button class="nav-item" data-target="personal">Personal</button></li>
       <li><button class="nav-item" data-target="newsletter-section">Newsletter</button></li>
       <li><button class="nav-item" data-target="contact">Contact</button></li>
     </ul>
@@ -97,22 +92,59 @@
   <div id="panels-wrap">
 
     <!-- ─────────────────────────────────────────────
-         S1 · AVATAR
+         S1 · HERO
+         Answers who / what / what next before any scroll.
+         Not in a .story-block: no dwell, nothing to scroll
+         through before the content is readable.
     ───────────────────────────────────────────── -->
-    <section id="intro-avatar" class="panel" data-theme="dark" style="z-index:1">
-      <div class="panel-inner avatar-panel-inner" id="avatarPanelInner">
-        <p class="avatar-quip">
-          <span class="quip-line quip-line--1">They're not staring&hellip;</span>
-          <span class="quip-line quip-line--2">they're networking.</span>
-        </p>
-        <div class="intro-avatar" id="introAvatar">
-          <div class="avatar-wrapper">
-            <img class="avatar-face" src="Avatar/face.png" alt="Kabir Mehta avatar" draggable="false" />
-            <img class="eyeball eye-left"  src="Avatar/eyeball.png" alt="" draggable="false" />
-            <img class="eyeball eye-right" src="Avatar/eyeball.png" alt="" draggable="false" />
+    <section id="hero" class="panel panel--hero" data-theme="dark" style="z-index:1">
+      <div class="hero-layout">
+
+        <div class="hero-text">
+          <p class="hero-greeting" data-setting="hero.greeting">Hi, I'm</p>
+          <h1 class="hero-name" data-setting="hero.name">Kabir Mehta.</h1>
+          <svg class="name-underline" viewBox="0 0 320 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path id="underline-path" d="M4 18 C 60 4, 160 28, 316 10" stroke="var(--green-light)" stroke-width="2.5" stroke-linecap="round" fill="none" pathLength="1"/>
+          </svg>
+
+          <p class="hero-role" data-setting="hero.role">MSc Management &amp; Technological Change · King's College London</p>
+
+          <p class="hero-pitch" data-setting="hero.pitch">
+            FinTech consultant turned AI-curious researcher. I spent two years at FinIQ
+            delivering structured products for global banks, and I'm now researching how
+            AI is reshaping who holds authority inside organisations.
+          </p>
+
+          <ul class="hero-proof">
+            <li data-setting="hero.proof1"><strong>2 years</strong> FinTech delivery, Bengaluru &amp; on-site North America</li>
+            <li data-setting="hero.proof2"><strong>Equity · Credit · FX</strong> structured products</li>
+            <li data-setting="hero.proof3"><strong>SQL automation</strong> that cut manual regression testing</li>
+          </ul>
+
+          <div class="hero-actions">
+            <button class="hero-btn hero-btn--primary" data-target="projects" data-setting="hero.cta_primary">See my work</button>
+            <a class="hero-btn hero-btn--ghost" id="heroCvBtn" href="Kabir_Mehta_Resume.pdf" download>Download Resume</a>
+            <button class="hero-btn hero-btn--ghost" data-target="contact" data-setting="hero.cta_contact">Get in touch</button>
+            <button class="hero-btn hero-btn--text" data-target="childhood" data-setting="hero.cta_story">Read my story</button>
           </div>
         </div>
+
+        <div class="hero-avatar-col">
+          <p class="avatar-quip">
+            <span class="quip-line quip-line--1" data-setting="hero.quip1">They're not staring&hellip;</span>
+            <span class="quip-line quip-line--2" data-setting="hero.quip2">they're networking.</span>
+          </p>
+          <div class="intro-avatar visible" id="introAvatar">
+            <div class="avatar-wrapper">
+              <img class="avatar-face" src="Avatar/face.png" alt="Kabir Mehta avatar" draggable="false" />
+              <img class="eyeball eye-left"  src="Avatar/eyeball.png" alt="" draggable="false" />
+              <img class="eyeball eye-right" src="Avatar/eyeball.png" alt="" draggable="false" />
+            </div>
+          </div>
+        </div>
+
       </div>
+
       <div class="scroll-indicator" aria-hidden="true">
         <span class="scroll-indicator__label">scroll</span>
         <div class="scroll-indicator__arrow">
@@ -122,66 +154,170 @@
     </section>
 
     <!-- ─────────────────────────────────────────────
-         S2 · ABOUT
+         S2 · WHAT I'M DOING NOW — King's College London
     ───────────────────────────────────────────── -->
     <div class="story-block">
-      <section id="intro-about" class="panel" data-theme="dark" style="z-index:2">
-      <div class="about-layout">
-        <div class="about-content" id="aboutPanelInner">
-          <div class="intro-name-block">
-            <p class="intro-greeting">Hi, I'm</p>
-            <h1 class="intro-name" aria-label="Kabir Mehta">
-              <span class="name-line" id="nameLine1">Kabir</span>
-              <span class="name-line" id="nameLine2">Mehta.</span>
-            </h1>
-            <svg class="name-underline" viewBox="0 0 320 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path id="underline-path" d="M4 18 C 60 4, 160 28, 316 10" stroke="var(--green-light)" stroke-width="2.5" stroke-linecap="round" fill="none" pathLength="1"/>
-            </svg>
-          </div>
-          <p class="intro-subtitle" id="introSubtitle">MSc · King's College London · Ex-FinIQ · AI Curious</p>
-          <p class="intro-about-para" id="introAboutPara">
-            FinTech consultant turned AI-curious researcher. I spent two years at FinIQ delivering structured products for global banks, then moved to London to study management and technology at King's. Right now I'm writing a dissertation on how AI is reshaping authority inside organisations, and honestly, I can't wait to see where it all goes.
-          </p>
-          <div class="about-loading" id="aboutLoading">
-            <p class="loading-msg">Skipping ahead to the good part…</p>
-            <div class="loading-bar-track">
-              <div class="loading-bar-fill" id="loadingBarFill"></div>
-            </div>
-            <p class="loading-countdown" id="loadingCountdown">Auto-scrolling in 10s</p>
+      <section id="kings" class="panel" data-theme="green" style="z-index:2">
+        <div class="panel-media">
+          <figure class="media-card media-card--logo" style="--x:16%; --y:22%; --w:58%; --tilt:2.5deg; --ar:1.85/1; --d:0">
+            <img src="images/KCL.webp" alt="King's College London logo" loading="lazy" />
+          </figure>
+          <figure class="media-card" style="--x:10%; --y:60%; --w:62%; --tilt:-2deg; --ar:16/9; --d:0.06">
+            <img src="images/London.webp" alt="London skyline" loading="lazy" />
+          </figure>
+        </div>
+        <div class="panel-inner">
+          <p class="panel-meta" data-field="meta">London, UK · Sep 2025 to Sep 2026</p>
+          <h2 class="panel-title" data-field="title">What I'm Doing Now</h2>
+          <p class="panel-role" data-field="role">MSc Management and Technological Change · King's College London</p>
+          <p class="panel-tagline" data-field="tagline">When curiosity gets serious, you move cities.</p>
+          <div class="panel-body" data-field="body">
+            <p>After FinIQ I wanted global perspectives, a deeper understanding of tech transformation, and a head start on an AI-driven future. New people, new cultures, new experiences: that part needed no convincing.</p>
+            <ul>
+              <li>Change management &amp; leadership in tech environments</li>
+              <li>Design sprints &amp; rapid prototyping</li>
+              <li>Working across diverse, international teams</li>
+            </ul>
           </div>
         </div>
-      </div>
       </section>
     </div>
 
     <!-- ─────────────────────────────────────────────
-         S3 · YOUNGER ME
+         S3 · CERTIFICATES
     ───────────────────────────────────────────── -->
     <div class="story-block">
-      <section id="childhood" class="panel" data-theme="cream" style="z-index:3">
+      <section id="certificates" class="panel panel--wide" data-theme="cream" style="z-index:3">
+        <div class="panel-inner panel-inner--wide">
+          <p class="panel-meta" data-field="meta">Credentials</p>
+          <h2 class="panel-title" data-field="title">Certificates</h2>
+          <div id="certsContainer" class="cards-grid cards-grid--light">
+            <p class="loading-text">Loading certificates…</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ─────────────────────────────────────────────
+         S4 · PROJECTS — the proof
+    ───────────────────────────────────────────── -->
+    <div class="story-block">
+      <section id="projects" class="panel panel--wide" data-theme="dark" style="z-index:4">
+        <div class="panel-inner panel-inner--wide">
+          <p class="panel-meta" data-field="meta">Built things</p>
+          <h2 class="panel-title" data-field="title">Projects</h2>
+          <p class="panel-tagline" data-field="tagline">Things I've shipped, broken, and rebuilt.</p>
+          <div id="projectsContainer" class="cards-grid cards-grid--dark">
+            <p class="loading-text">Loading projects…</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ─────────────────────────────────────────────
+         S5 · RESEARCH (dissertation + AI interest)
+    ───────────────────────────────────────────── -->
+    <div class="story-block">
+      <section id="dissertation" class="panel" data-theme="cream" style="z-index:5">
+        <div class="panel-inner">
+          <p class="panel-meta" data-field="meta">Research · 2025 to 2026</p>
+          <h2 class="panel-title" data-field="title">Research</h2>
+          <p class="panel-role" data-field="role">MSc dissertation · AI and authority in organisations</p>
+          <p class="panel-tagline" data-field="tagline">AI is changing roles. I'm studying the humans in between.</p>
+          <div class="panel-body" data-field="body">
+            <p>Working with a fintech firm, I'm finding that as AI tools spread, the people who master them fastest often become the ones colleagues turn to, earning real influence that doesn't always match their job title.</p>
+            <ul>
+              <li>Interviews across roles and levels of seniority</li>
+              <li>How managers respond when expertise shifts</li>
+              <li>Qualitative research, stakeholder interviews, extensive literature review</li>
+            </ul>
+            <p>The interest itself started earlier, when automating regression testing at FinIQ turned curiosity into something I wanted to pursue properly. Certified in AI Fluency: Foundation &amp; Framework (Anthropic), and exploring AI tools daily since.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ─────────────────────────────────────────────
+         S6 · FinIQ — Product Application Consultant
+    ───────────────────────────────────────────── -->
+    <div class="story-block">
+      <section id="finiq" class="panel" data-theme="green" style="z-index:6">
         <div class="panel-media">
-          <figure class="media-card" style="--x:0%; --y:2%; --w:80%; --tilt:-3deg; --ar:16/9; --d:0">
-            <img src="images/School.jpeg" alt="Shelf of school trophies from Amity International School" loading="lazy" />
-          </figure>
-          <figure class="media-card" style="--x:24%; --y:34%; --w:66%; --tilt:2.5deg; --ar:4/3; --d:0.05">
-            <img src="images/AVTE.jpeg" alt="Academic award trophies for maths, accounts and English" loading="lazy" />
-          </figure>
-          <figure class="media-card" style="--x:2%; --y:64%; --w:60%; --tilt:-2deg; --ar:16/9; --d:0.1">
-            <img src="images/BrainOBrain.jpeg" alt="Brainobrain abacus competition medals" loading="lazy" />
+          <figure class="media-card media-card--logo" style="--x:14%; --y:32%; --w:64%; --tilt:-2deg; --ar:2.2/1; --d:0">
+            <img src="images/FinIQ.webp" alt="FinIQ, The Financial Engineering Company logo" loading="lazy" />
           </figure>
         </div>
         <div class="panel-inner">
-          <p class="panel-meta">Born on 31-12-2001</p>
-          <h2 class="panel-title">Younger Me</h2>
-          <p class="panel-tagline">Started with abacus… upgraded to AI curiosity.</p>
-          <button class="expand-btn" aria-expanded="false" data-target="childhood-expand">
-            Read more <span class="arrow">↓</span>
-          </button>
-          <div class="expandable" id="childhood-expand" aria-hidden="true">
+          <p class="panel-meta" data-field="meta">Bengaluru, India · Jun 2023 to Jul 2025</p>
+          <h2 class="panel-title" data-field="title">FinIQ</h2>
+          <p class="panel-role" data-field="role">Product Application Consultant</p>
+          <p class="panel-tagline" data-field="tagline">From testing systems to testing what I really want.</p>
+          <div class="panel-body" data-field="body">
+            <p>FinIQ builds structured products platforms for banks globally.</p>
+            <ul>
+              <li>Led delivery and testing of structured products across equity, credit, and FX</li>
+              <li>Automated regression testing using SQL, which cut out a big chunk of manual effort</li>
+              <li>Provided on-site support for a leading institutional digital bank in North America</li>
+              <li>Collaborated with international clients across time zones</li>
+            </ul>
+            <blockquote>Start small → plan well → iterate → scale.</blockquote>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ─────────────────────────────────────────────
+         S7 · CHRIST UNIVERSITY
+    ───────────────────────────────────────────── -->
+    <div class="story-block">
+      <section id="christ" class="panel" data-theme="cream" style="z-index:7">
+        <div class="panel-media">
+          <figure class="media-card media-card--logo" style="--x:20%; --y:28%; --w:52%; --tilt:2deg; --ar:1/1; --d:0">
+            <img src="images/Christ.webp" alt="Christ University crest" loading="lazy" />
+          </figure>
+        </div>
+        <div class="panel-inner">
+          <p class="panel-meta" data-field="meta">Bengaluru, India · 2020 to 2023</p>
+          <h2 class="panel-title" data-field="title">Christ University</h2>
+          <p class="panel-role" data-field="role">BCom · First Class Honours</p>
+          <p class="panel-tagline" data-field="tagline">Commerce made sense. Finance made more.</p>
+          <div class="panel-body" data-field="body">
+            <p>Chose Commerce because of family business exposure and a natural grip on maths and accounting. Explored sales through internships and tried marketing competitions, then moved toward finance for long-term growth.</p>
+            <ul>
+              <li>Finance &amp; Accounting intern at Zoomcar</li>
+              <li>Graduated First Class Honours, with a placement at FinIQ</li>
+              <li>Audit Committee member: attention to detail and clean, accurate work</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ─────────────────────────────────────────────
+         S8 · EARLY YEARS
+    ───────────────────────────────────────────── -->
+    <div class="story-block">
+      <section id="childhood" class="panel" data-theme="dark" style="z-index:8">
+        <div class="panel-media">
+          <figure class="media-card" style="--x:0%; --y:2%; --w:76%; --tilt:-3deg; --ar:16/9; --d:0">
+            <img src="images/School.jpeg" alt="Shelf of school trophies from Amity International School" loading="lazy" />
+          </figure>
+          <figure class="media-card" style="--x:26%; --y:36%; --w:62%; --tilt:2.5deg; --ar:4/3; --d:0.05">
+            <img src="images/AVTE.jpeg" alt="Academic award trophies for maths, accounts and English" loading="lazy" />
+          </figure>
+          <figure class="media-card" style="--x:2%; --y:66%; --w:56%; --tilt:-2deg; --ar:9/8; --d:0.1">
+            <img src="images/SteveJobs.webp" alt="Steve Jobs holding an iPhone" loading="lazy" />
+          </figure>
+        </div>
+        <div class="panel-inner">
+          <p class="panel-meta" data-field="meta">New Delhi · 2001 to 2020</p>
+          <h2 class="panel-title" data-field="title">Early Years</h2>
+          <p class="panel-tagline" data-field="tagline">Started with abacus… upgraded to AI curiosity.</p>
+          <div class="panel-body" data-field="body">
             <p>Grew up in New Delhi and studied at Amity International School, Pushp Vihar. Took Commerce with Maths because numbers always made sense.</p>
-            <p>Went to abacus classes and picked up quite a few trophies early on (peak performance age: 12 to 15 😄). Was into skating and racquet sports, and can still play decently… after a warm-up and a reality check.</p>
-            <p>Always fascinated by technology: phones, tablets, cars, basically anything new. That curiosity never left. It just grew into a deeper interest in AI.</p>
-            <div class="expand-gallery">
+            <p>Went to abacus classes and picked up quite a few trophies early on (peak performance age: 12 to 15 😄). Skating and racquet sports too, and I can still play decently… after a warm-up and a reality check.</p>
+            <p>The tech obsession started with reading about Steve Jobs in middle school. Followed Apple, then the competitors, and kept going deeper. AI got serious during COVID, when there was finally time to explore, learn and take on remote internships.</p>
+            <div class="mini-gallery">
               <figure>
                 <img src="images/Olympiad.jpeg" alt="Maths Olympiad medals" loading="lazy" />
                 <figcaption>Olympiad medals</figcaption>
@@ -209,193 +345,10 @@
     </div>
 
     <!-- ─────────────────────────────────────────────
-         S4 · EARLY SPARK
+         S9 · PERSONAL SIDE
     ───────────────────────────────────────────── -->
     <div class="story-block">
-      <section id="early-spark" class="panel" data-theme="dark" style="z-index:4">
-        <div class="panel-media">
-          <figure class="media-card" style="--x:12%; --y:22%; --w:70%; --tilt:-2.5deg; --ar:9/8; --d:0">
-            <img src="images/SteveJobs.webp" alt="Steve Jobs holding an iPhone" loading="lazy" />
-          </figure>
-        </div>
-        <div class="panel-inner">
-          <p class="panel-meta">Turning Point</p>
-          <h2 class="panel-title">Early Spark</h2>
-          <p class="panel-tagline">Blame Steve Jobs… and a lot of curiosity.</p>
-          <button class="expand-btn" aria-expanded="false" data-target="early-spark-expand">
-            Read more <span class="arrow">↓</span>
-          </button>
-          <div class="expandable" id="early-spark-expand" aria-hidden="true">
-            <p>Technology has always been a constant interest. It started with reading about Steve Jobs in middle school. Followed Apple, then competitors, and kept going deeper.</p>
-            <p>AI got serious during COVID, when I finally had time to explore, learn, and do remote internships. That's when curiosity turned into something more intentional.</p>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- ─────────────────────────────────────────────
-         S5 · CHRIST UNIVERSITY
-    ───────────────────────────────────────────── -->
-    <div class="story-block">
-      <section id="christ" class="panel" data-theme="cream" style="z-index:5">
-        <div class="panel-media">
-          <figure class="media-card media-card--logo" style="--x:20%; --y:28%; --w:52%; --tilt:2deg; --ar:1/1; --d:0">
-            <img src="images/Christ.webp" alt="Christ University crest" loading="lazy" />
-          </figure>
-        </div>
-        <div class="panel-inner">
-          <p class="panel-meta">Bengaluru, India · 2020-2023</p>
-          <h2 class="panel-title">Christ University</h2>
-          <p class="panel-tagline">Commerce made sense. Finance made more.</p>
-          <button class="expand-btn" aria-expanded="false" data-target="christ-expand">
-            Read more <span class="arrow">↓</span>
-          </button>
-          <div class="expandable" id="christ-expand" aria-hidden="true">
-            <p>Chose Commerce because of family business exposure and a natural grip on maths and accounting. Explored sales through internships and tried marketing competitions, but eventually moved toward finance for long-term growth.</p>
-            <p>Interned in Finance &amp; Accounting at Zoomcar. Graduated First Class Honours with a placement at FinIQ.</p>
-            <p>Served on the Audit Committee, which taught me attention to detail and how to deliver clean, accurate work.</p>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- ─────────────────────────────────────────────
-         S6 · FINIQ  ← AUTO-SCROLL TARGET
-    ───────────────────────────────────────────── -->
-    <div class="story-block">
-      <section id="finiq" class="panel" data-theme="green" style="z-index:6">
-        <div class="panel-media">
-          <figure class="media-card media-card--logo" style="--x:14%; --y:32%; --w:64%; --tilt:-2deg; --ar:2.2/1; --d:0">
-            <img src="images/FinIQ.webp" alt="FinIQ, The Financial Engineering Company logo" loading="lazy" />
-          </figure>
-        </div>
-        <div class="panel-inner">
-          <p class="panel-meta">Bengaluru, India · Jun 2023 to Jul 2025</p>
-          <h2 class="panel-title">FinIQ</h2>
-          <p class="panel-tagline">From testing systems to testing what I really want.</p>
-          <button class="expand-btn" aria-expanded="false" data-target="finiq-expand">
-            Read more <span class="arrow">↓</span>
-          </button>
-          <div class="expandable" id="finiq-expand" aria-hidden="true">
-            <p>Product Application Consultant at FinIQ, a FinTech company building structured products platforms for banks globally.</p>
-            <ul>
-              <li>Led delivery and testing of structured products across equity, credit, and FX</li>
-              <li>Automated regression testing using SQL, which cut out a big chunk of manual effort</li>
-              <li>Provided on-site support for a leading institutional digital bank in North America</li>
-              <li>Collaborated with international clients across time zones</li>
-            </ul>
-            <blockquote>Start small → plan well → iterate → scale.</blockquote>
-            <p>This experience clarified what I want to pursue long-term.</p>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- ─────────────────────────────────────────────
-         S7 · WHY LONDON
-    ───────────────────────────────────────────── -->
-    <div class="story-block">
-      <section id="why-msc" class="panel" data-theme="dark" style="z-index:7">
-        <div class="panel-inner">
-          <p class="panel-meta">The Decision · 2025</p>
-          <h2 class="panel-title">Why London?</h2>
-          <p class="panel-tagline">When curiosity gets serious, you move cities.</p>
-          <button class="expand-btn" aria-expanded="false" data-target="why-msc-expand">
-            Read more <span class="arrow">↓</span>
-          </button>
-          <div class="expandable" id="why-msc-expand" aria-hidden="true">
-            <p>After FinIQ, I chose to pursue an MSc in Management and Technological Change in London. I wanted global perspectives, a deeper understanding of tech transformation, and a head start on an AI-driven future.</p>
-            <p>Also: new people, new cultures, new experiences. That part needed no convincing.</p>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- ─────────────────────────────────────────────
-         S8 · KING'S COLLEGE LONDON
-    ───────────────────────────────────────────── -->
-    <div class="story-block">
-      <section id="kings" class="panel" data-theme="cream" style="z-index:8">
-        <div class="panel-media">
-          <figure class="media-card media-card--logo" style="--x:16%; --y:30%; --w:58%; --tilt:2.5deg; --ar:1.85/1; --d:0">
-            <img src="images/KCL.webp" alt="King's College London logo" loading="lazy" />
-          </figure>
-        </div>
-        <div class="panel-inner">
-          <p class="panel-meta">London, UK · Sep 2025 to Sep 2026</p>
-          <h2 class="panel-title">King's College London</h2>
-          <p class="panel-tagline">Where tech meets management… and chaos meets structure.</p>
-          <button class="expand-btn" aria-expanded="false" data-target="kings-expand">
-            Read more <span class="arrow">↓</span>
-          </button>
-          <div class="expandable" id="kings-expand" aria-hidden="true">
-            <p>MSc Management and Technological Change, chosen to grow beyond FinTech and understand tech's broader impact.</p>
-            <ul>
-              <li>Change management &amp; leadership in tech environments</li>
-              <li>Design sprints &amp; rapid prototyping</li>
-              <li>Working across diverse, international teams</li>
-            </ul>
-            <p>Balancing academics, dissertation, and AI exploration. Genuinely enjoying the process.</p>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- ─────────────────────────────────────────────
-         S9 · DISSERTATION  — now in story-block
-    ───────────────────────────────────────────── -->
-    <div class="story-block">
-      <section id="dissertation" class="panel" data-theme="dark" style="z-index:9">
-        <div class="panel-inner">
-          <p class="panel-meta">Research · 2025-2026</p>
-          <h2 class="panel-title">Dissertation</h2>
-          <p class="panel-tagline">AI is changing roles. I'm studying the humans in between.</p>
-          <button class="expand-btn" aria-expanded="false" data-target="dissertation-expand">
-            Read more <span class="arrow">↓</span>
-          </button>
-          <div class="expandable" id="dissertation-expand" aria-hidden="true">
-            <p>For my MSc dissertation at King's College London, I'm researching how AI is reshaping who holds influence inside teams. Working with a fintech firm, I'm finding that as AI tools spread, the people who master them fastest often become the ones colleagues turn to, earning real influence that doesn't always match their job title.</p>
-            <ul>
-              <li>Interviews across roles and levels of seniority</li>
-              <li>How managers respond when expertise shifts</li>
-              <li>What it means for the way teams are led</li>
-              <li>Qualitative research, stakeholder interviews, extensive literature review</li>
-            </ul>
-            <p>Hands-on practice at turning everyday workplace behaviour into insight a business can act on.</p>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- ─────────────────────────────────────────────
-         S10 · AI INTEREST  — now in story-block
-    ───────────────────────────────────────────── -->
-    <div class="story-block">
-      <section id="ai-interest" class="panel" data-theme="green" style="z-index:10">
-        <div class="panel-inner">
-          <p class="panel-meta">Ongoing</p>
-          <h2 class="panel-title">AI Interest</h2>
-          <p class="panel-tagline">Curiosity → automation → this might actually be serious.</p>
-          <button class="expand-btn" aria-expanded="false" data-target="ai-interest-expand">
-            Read more <span class="arrow">↓</span>
-          </button>
-          <div class="expandable" id="ai-interest-expand" aria-hidden="true">
-            <p>Shifted from curiosity to serious interest when I automated regression testing at FinIQ. That moment made me realise this is something I want to seriously pursue.</p>
-            <ul>
-              <li>Actively exploring AI tools daily</li>
-              <li>Certified: AI Fluency: Foundation &amp; Framework (Anthropic)</li>
-              <li>Thinking seriously about long-term impact</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- ─────────────────────────────────────────────
-         S11 · PERSONAL
-    ───────────────────────────────────────────── -->
-    <div class="story-block">
-      <section id="personal" class="panel" data-theme="cream" style="z-index:11">
+      <section id="personal" class="panel" data-theme="cream" style="z-index:9">
         <div class="panel-media">
           <figure class="media-card" style="--x:0%; --y:14%; --w:74%; --tilt:-3deg; --ar:16/9; --d:0">
             <img src="images/Redbull.webp" alt="Red Bull Formula 1 car" loading="lazy" />
@@ -405,13 +358,10 @@
           </figure>
         </div>
         <div class="panel-inner">
-          <p class="panel-meta">Beyond the CV</p>
-          <h2 class="panel-title">Personal Side</h2>
-          <p class="panel-tagline">Organised… but not boring.</p>
-          <button class="expand-btn" aria-expanded="false" data-target="personal-expand">
-            Read more <span class="arrow">↓</span>
-          </button>
-          <div class="expandable" id="personal-expand" aria-hidden="true">
+          <p class="panel-meta" data-field="meta">Beyond the CV</p>
+          <h2 class="panel-title" data-field="title">Personal Side</h2>
+          <p class="panel-tagline" data-field="tagline">Organised… but not boring.</p>
+          <div class="panel-body" data-field="body">
             <ul class="personal-list">
               <li>🏎️ Huge Formula 1 fan (Red Bull supporter)</li>
               <li>🎵 Music is constant: techno, house, rap, rock, Indian music, whatever fits the mood</li>
@@ -424,46 +374,16 @@
     </div>
 
     <!-- ─────────────────────────────────────────────
-         S12 · PROJECTS
+         S10 · AI NEWSLETTER
     ───────────────────────────────────────────── -->
     <div class="story-block">
-      <section id="projects" class="panel panel--wide" data-theme="dark" style="z-index:12">
-        <div class="panel-inner panel-inner--wide">
-          <p class="panel-meta">Built things</p>
-          <h2 class="panel-title">Projects</h2>
-          <div id="projectsContainer" class="cards-grid cards-grid--dark">
-            <p class="loading-text">Loading projects…</p>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- ─────────────────────────────────────────────
-         S13 · CERTIFICATES
-    ───────────────────────────────────────────── -->
-    <div class="story-block">
-      <section id="certificates" class="panel panel--wide" data-theme="cream" style="z-index:13">
-        <div class="panel-inner panel-inner--wide">
-          <p class="panel-meta">Credentials</p>
-          <h2 class="panel-title">Certificates</h2>
-          <div id="certsContainer" class="cards-grid cards-grid--light">
-            <p class="loading-text">Loading certificates…</p>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- ─────────────────────────────────────────────
-         S14 · NEWSLETTER + FOOTER
-    ───────────────────────────────────────────── -->
-    <div class="story-block">
-    <section id="newsletter-section" class="panel" data-theme="green" style="z-index:14">
+    <section id="newsletter-section" class="panel" data-theme="green" style="z-index:10">
       <div class="panel-inner">
-        <p class="newsletter-launch-date">Coming soon</p>
-        <h2 class="panel-title">AI Newsletter</h2>
-        <p class="panel-tagline">Weekly notes on what's actually happening in AI.</p>
+        <p class="newsletter-launch-date" data-field="meta">Coming soon</p>
+        <h2 class="panel-title" data-field="title">AI Newsletter</h2>
+        <p class="panel-tagline" data-field="tagline">Weekly notes on what's actually happening in AI.</p>
 
-        <p class="newsletter-cta">Register for early access now</p>
+        <p class="newsletter-cta" data-field="body">Register for early access now</p>
 
         <form id="newsletterForm" class="newsletter-form" novalidate>
           <div class="newsletter-form__row">
@@ -478,9 +398,9 @@
         </form>
 
         <div class="footer-links">
-          <a href="https://www.linkedin.com/in/kabir-mehta-49860619a" target="_blank" rel="noopener noreferrer" class="footer-link">LinkedIn</a>
+          <a href="https://www.linkedin.com/in/kabir-mehta-49860619a" target="_blank" rel="noopener noreferrer" class="footer-link" data-setting="contact.linkedin">LinkedIn</a>
           <span class="footer-link-divider" aria-hidden="true">·</span>
-          <a href="mailto:kabirmehta3112@gmail.com" class="footer-link">kabirmehta3112@gmail.com</a>
+          <a href="mailto:kabirmehta3112@gmail.com" class="footer-link" data-setting="contact.email">kabirmehta3112@gmail.com</a>
         </div>
 
         <footer class="site-footer">
@@ -488,19 +408,19 @@
         </footer>
       </div>
     </section>
-    </div><!-- /.story-block newsletter -->
+    </div>
 
     <!-- ─────────────────────────────────────────────
-         S15 · CONTACT
+         S11 · CONTACT
     ───────────────────────────────────────────── -->
-    <section id="contact" class="panel panel--wide" data-theme="dark" style="z-index:15">
+    <section id="contact" class="panel panel--wide" data-theme="dark" style="z-index:11">
       <div class="panel-inner panel-inner--wide">
         <div class="contact-layout">
 
           <!-- LEFT: Form -->
           <div class="contact-form-col">
-            <p class="panel-meta">Get in touch</p>
-            <h2 class="panel-title">Let's Connect</h2>
+            <p class="panel-meta" data-field="meta">Get in touch</p>
+            <h2 class="panel-title" data-field="title">Let's Connect</h2>
             <form id="contactForm" class="contact-form" novalidate>
               <div class="form-row form-row--half">
                 <div class="form-group">
@@ -543,24 +463,24 @@
 
           <!-- RIGHT: Avatar + direct contact -->
           <div class="contact-avatar-col">
-            <div class="contact-bubble">Hope to get in touch with you soon ✉️</div>
+            <div class="contact-bubble" data-setting="contact.bubble">Hope to get in touch with you soon ✉️</div>
             <img src="images/avatar.png" alt="Kabir Mehta" class="contact-avatar" />
             <div class="contact-direct">
-              <a href="mailto:kabirmehta3112@gmail.com" class="contact-direct-link">
+              <a href="mailto:kabirmehta3112@gmail.com" class="contact-direct-link" data-setting="contact.email">
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
                   <path d="M1 4.5 8 9l7-4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
                 </svg>
-                kabirmehta3112@gmail.com
+                <span data-label>kabirmehta3112@gmail.com</span>
               </a>
-              <a href="https://www.linkedin.com/in/kabir-mehta-49860619a" target="_blank" rel="noopener noreferrer" class="contact-direct-link">
+              <a href="https://www.linkedin.com/in/kabir-mehta-49860619a" target="_blank" rel="noopener noreferrer" class="contact-direct-link" data-setting="contact.linkedin">
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.4"/>
                   <path d="M4 6.5v5M4 3.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                   <path d="M7.5 11.5V9c0-1.4 1-2.5 2.5-2.5s2.5 1.1 2.5 2.5v2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
                   <path d="M7.5 6.5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
                 </svg>
-                linkedin.com/in/kabir-mehta
+                <span data-label>linkedin.com/in/kabir-mehta</span>
               </a>
             </div>
           </div>
@@ -571,24 +491,47 @@
 
   </div><!-- /#panels-wrap -->
 
-  <!-- FinIQ context overlay -->
-  <div id="finiq-overlay" aria-hidden="true" role="dialog" aria-label="Navigation context">
-    <div class="finiq-overlay__inner">
-      <p class="finiq-overlay__hint finiq-overlay__hint--up">
-        <span class="finiq-overlay__arrow">↑</span>
-        Scroll up to know about me before this
-      </p>
-      <div class="finiq-overlay__divider"></div>
-      <p class="finiq-overlay__hint finiq-overlay__hint--down">
-        <span class="finiq-overlay__arrow">↓</span>
-        Scroll down to know more about me after this
-      </p>
+  <!-- ═══════════════════════════════════════════════════
+       SECTION TEMPLATE
+
+       Sections added in the editor do not exist in this file, so
+       site-content.js clones this for them. The panels above are
+       deliberately left as real markup rather than being generated
+       from here too: they are the fallback the site renders when
+       Supabase is unreachable, and a template cannot fall back.
+
+       Layout variants (quote, photos, gallery) are handled by
+       site-content.js removing the parts a layout does not use.
+  ═══════════════════════════════════════════════════ -->
+  <template id="sectionTemplate">
+    <div class="story-block">
+      <section class="panel" data-theme="dark">
+        <div class="panel-media"></div>
+        <div class="panel-inner">
+          <p class="panel-meta" data-field="meta"></p>
+          <h2 class="panel-title" data-field="title"></h2>
+          <p class="panel-role" data-field="role"></p>
+          <p class="panel-tagline" data-field="tagline"></p>
+          <div class="panel-body" data-field="body"></div>
+        </div>
+      </section>
     </div>
-    <button class="finiq-overlay__dismiss" aria-label="Dismiss">Got it</button>
-  </div>
+  </template>
+
+  <template id="quoteTemplate">
+    <div class="story-block">
+      <section class="panel panel--quote" data-theme="dark">
+        <div class="panel-inner panel-inner--quote">
+          <h2 class="panel-title" data-field="title"></h2>
+          <div class="panel-body panel-body--quote" data-field="body"></div>
+        </div>
+      </section>
+    </div>
+  </template>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="config.js"></script>
+  <script src="site-content.js"></script>
   <script src="Avatar/avatar.js"></script>
   <script src="app.js"></script>
 </body>

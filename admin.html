@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Site editor — Kabir Mehta</title>
+
+  <!-- Not a secret page, but no reason for it to appear in search. -->
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='rgb(122,154,106)'/%3E%3Ctext x='50' y='70' font-family='Georgia,serif' font-size='56' fill='rgb(17,17,17)' text-anchor='middle'%3E%E2%9A%99%3C/text%3E%3C/svg%3E" />
+
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════
+       LOGIN
+       The gate that actually matters is the RLS policy on the
+       tables. This screen is just the way in.
+  ═══════════════════════════════════════════════════ -->
+  <div id="loginScreen" class="login-screen">
+    <form id="loginForm" class="login-card">
+      <h1>Site editor</h1>
+      <p class="login-sub">Sign in to edit your portfolio.</p>
+
+      <label for="loginEmail">Email</label>
+      <input type="email" id="loginEmail" autocomplete="username" required />
+
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" autocomplete="current-password" required />
+
+      <button type="submit" class="btn btn--primary btn--full">Sign in</button>
+      <p id="loginError" class="login-error" role="alert"></p>
+    </form>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       EDITOR
+  ═══════════════════════════════════════════════════ -->
+  <div id="app" class="app" hidden>
+
+    <header class="topbar">
+      <div class="topbar__group">
+        <strong class="brand">Site editor</strong>
+        <span id="whoami" class="muted"></span>
+      </div>
+
+      <div class="topbar__group topbar__group--center">
+        <!-- Select vs Browse. Clicking selects things for editing by
+             default; Browse hands the preview back to the real site so
+             links, buttons and forms can be tested. -->
+        <div class="mode-switch" role="group" aria-label="Preview mode">
+          <button class="mode-btn active" id="modeSelect" data-mode="select">Select</button>
+          <button class="mode-btn" id="modeBrowse" data-mode="browse">Browse</button>
+        </div>
+
+        <div class="size-switch" role="group" aria-label="Preview width">
+          <button class="size-btn active" data-w="100%">Desktop</button>
+          <button class="size-btn" data-w="768px">Tablet</button>
+          <button class="size-btn" data-w="375px">Mobile</button>
+        </div>
+
+        <label class="checkbox checkbox--inline" title="Removes the scroll animation so you can find things faster">
+          <input type="checkbox" id="flattenToggle" checked />
+          Compact preview
+        </label>
+      </div>
+
+      <div class="topbar__group">
+        <span id="saveState" class="save-state" role="status" aria-live="polite"></span>
+        <button id="helpBtn" class="btn btn--ghost" title="Show the walkthrough again">?</button>
+        <a href="index.html" target="_blank" rel="noopener" class="btn btn--ghost">Open site</a>
+        <button id="logout" class="btn btn--ghost">Sign out</button>
+      </div>
+    </header>
+
+    <div class="layout">
+
+      <!-- ── Preview: the main surface ── -->
+      <main class="preview" id="preview">
+        <div class="preview__frame">
+          <iframe id="previewFrame" src="index.html" title="Site preview"></iframe>
+        </div>
+      </main>
+
+      <!-- ── Inspector ── -->
+      <aside class="inspector" id="inspector">
+        <nav class="insp-tabs">
+          <button class="insp-tab active" data-insp="selected">Selected</button>
+          <button class="insp-tab" data-insp="outline">Sections</button>
+          <button class="insp-tab" data-insp="design">Design</button>
+          <button class="insp-tab" data-insp="seo">Settings</button>
+        </nav>
+
+        <div class="insp-body">
+
+          <!-- What you clicked -->
+          <section class="insp-panel active" data-panel="selected">
+            <div id="selectedEmpty" class="empty-state">
+              <div class="empty-state__icon" aria-hidden="true">◎</div>
+              <h2>Click anything to edit it</h2>
+              <p>Move your pointer over the preview. Anything you can change
+                 lights up, with a label telling you what it is.</p>
+              <ul class="empty-state__list">
+                <li>Headings, datelines and paragraphs</li>
+                <li>Photos, to move and resize them</li>
+                <li>Project and certificate cards</li>
+                <li>The empty background of a section, for its colour and order</li>
+              </ul>
+              <p class="empty-state__foot">Switch to <strong>Browse</strong> in the
+                 top bar to use the site normally instead.</p>
+            </div>
+            <div id="selectedBody" hidden>
+              <div class="insp-head">
+                <div>
+                  <p class="insp-crumb" id="inspCrumb"></p>
+                  <h2 class="insp-title" id="inspTitle"></h2>
+                </div>
+                <button class="icon-btn" id="deselect" title="Close (Esc)">×</button>
+              </div>
+              <div id="inspControls"></div>
+              <div class="insp-step">
+                <button class="btn btn--small" id="stepPrev">← Previous</button>
+                <button class="btn btn--small" id="stepNext">Next →</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Section list: order, visibility, add, delete -->
+          <section class="insp-panel" data-panel="outline">
+            <p class="hint">Drag <span class="grip-demo">⠿</span> to reorder.
+               The eye hides a section without deleting it.</p>
+            <div id="sectionList" class="stack"></div>
+            <button id="addSection" class="btn btn--primary btn--full">+ Add a section</button>
+          </section>
+
+          <!-- Theme -->
+          <section class="insp-panel" data-panel="design">
+            <p class="hint">Changes show in the preview after you save.</p>
+            <div id="themeFields" class="stack"></div>
+            <button id="themeReset" class="btn btn--ghost btn--full">Reset design to defaults</button>
+          </section>
+
+          <!-- Things with no on-page element to click -->
+          <section class="insp-panel" data-panel="seo">
+            <p class="hint">Page title, share preview, CV file and contact details.</p>
+            <div id="seoFields" class="stack"></div>
+            <h2 class="group-title">Checks</h2>
+            <div id="warnings" class="stack"></div>
+          </section>
+
+        </div>
+      </aside>
+    </div>
+
+    <!-- Unsaved changes bar -->
+    <div class="unsaved-bar" id="unsavedBar" hidden>
+      <span id="unsavedCount"></span>
+      <div class="unsaved-bar__actions">
+        <button id="discardAll" class="btn btn--ghost">Discard</button>
+        <button id="saveAll" class="btn btn--primary">Save and publish</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       ADD SECTION — layout picker
+  ═══════════════════════════════════════════════════ -->
+  <div class="modal" id="layoutModal" hidden>
+    <div class="modal__card">
+      <h2>Add a section</h2>
+      <p class="muted">Pick a shape. You can change the content afterwards.</p>
+      <div class="layout-grid">
+        <button class="layout-card" data-layout="text">
+          <span class="layout-card__art layout-card__art--text" aria-hidden="true"></span>
+          <strong>Text only</strong>
+          <small>A heading and some copy.</small>
+        </button>
+        <button class="layout-card" data-layout="photos">
+          <span class="layout-card__art layout-card__art--photos" aria-hidden="true"></span>
+          <strong>Text with photos</strong>
+          <small>Copy, with floating photos beside it.</small>
+        </button>
+        <button class="layout-card" data-layout="gallery">
+          <span class="layout-card__art layout-card__art--gallery" aria-hidden="true"></span>
+          <strong>Text with a strip</strong>
+          <small>Copy, with small thumbnails underneath.</small>
+        </button>
+        <button class="layout-card" data-layout="quote">
+          <span class="layout-card__art layout-card__art--quote" aria-hidden="true"></span>
+          <strong>Full-width quote</strong>
+          <small>One statement holding the screen.</small>
+        </button>
+      </div>
+      <button class="btn btn--ghost btn--full" id="layoutCancel">Cancel</button>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       FIRST-RUN WALKTHROUGH
+  ═══════════════════════════════════════════════════ -->
+  <div class="modal" id="tourModal" hidden>
+    <div class="modal__card">
+      <p class="tour-step" id="tourStep"></p>
+      <h2 id="tourTitle"></h2>
+      <p id="tourBody"></p>
+      <div class="tour-actions">
+        <button class="btn btn--ghost" id="tourSkip">Skip</button>
+        <button class="btn btn--primary" id="tourNext">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

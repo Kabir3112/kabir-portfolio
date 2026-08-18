@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# The resume is reachable only through the "Download Resume" button in
+# the hero. It is not linked anywhere else and should not appear in
+# search results, so keep crawlers off the file itself.
+Disallow: /Kabir_Mehta_Resume.pdf

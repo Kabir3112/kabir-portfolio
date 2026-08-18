@@ -6,19 +6,14 @@
    2.  State & helpers
    3.  Story-block scroll architecture (image bottom-to-top)
    4.  Section reveal (IntersectionObserver)
-   5.  Intro animations
-   6.  Progress bar
-   7.  Timeline nav (desktop + mobile)
-   8.  Mobile menu
-   9.  Expand / collapse buttons
-   10. FinIQ context overlay
-   11. Supabase — load projects
-   12. Supabase — load certificates
-   13. Auto-scroll guard
-   14. Sidebar visibility (auto-hide on idle)
-   15. Contact form (Supabase)
-   16. Newsletter form
-   17. Boot
+   5.  Progress bar
+   6.  Timeline nav, hero jump buttons, CV link
+   7.  Mobile menu
+   8.  Supabase — load projects
+   9.  Supabase — load certificates
+   10. Contact form (Supabase)
+   11. Newsletter form
+   12. Boot
    ============================================================ */
 
 
@@ -31,10 +26,19 @@ const SUPABASE_URL      = window.SUPABASE_URL;
 const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
 
 /* Null when config.js or the supabase-js CDN script failed to load —
-   loaders below fall back to static content instead of crashing. */
-const db = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null;
+   loaders below fall back to static content instead of crashing.
+
+   Memoised on window because site-content.js needs a client too, and
+   two createClient() calls in one page share the same auth storage key
+   — which supabase-js warns about ("Multiple GoTrueClient instances")
+   and treats as undefined behaviour under concurrent use. Whichever
+   file gets there first builds it; the other reuses it. */
+const db = (function () {
+  if (window.__sbClient) return window.__sbClient;
+  if (!(window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)) return null;
+  window.__sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return window.__sbClient;
+})();
 
 
 /* ─────────────────────────────────────────────────────────────
@@ -43,33 +47,45 @@ const db = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
 let sections          = [];  // { el, inner } for all .panel elements
 let sectionScrollTops = new Map(); // cached absolute scroll positions
 let scrollRAF         = null;
-let aboutSequenceStarted = false;
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-/* Dwell — how far you scroll while a section is pinned — is deliberately
-   NOT listed per section any more. It used to be hand-tuned here and had
-   drifted to a 2.7x spread (Projects held for 335vh, Personal for 124vh),
-   so identical wheel movement bought wildly different amounts of content
-   and the page felt like it stalled on the card sections.
+/* Scroll effects are desktop-only. On a phone the dwell and the parallax
+   are pure cost: NN/G's scrolljacking study found small screens and
+   touch-only input make altered scroll behaviour markedly more
+   disorienting, and a section that holds for an extra 20vh on desktop
+   feels like a stuck page on mobile. Below this width every panel is a
+   plain 100vh block in normal document flow. */
+const MOTION_MIN_WIDTH = 768;
+const motionEnabled = () =>
+  !prefersReducedMotion.matches && window.innerWidth >= MOTION_MIN_WIDTH;
 
-   setStoryBlockHeights() now gives every section the same base dwell and
-   adds room to card sections only when their content actually overflows,
-   measured at runtime. `depth` and `textLead` stay per-section because
-   those are motion character, not pacing. */
-const BASE_DWELL_VH = 55;
+/* Dwell — how far you scroll while a section is pinned.
+   Deliberately small. Dwell buys animation room, not content: every extra
+   vh here is scrolling that delivers no new information, and the page was
+   previously 22 screen-heights deep because of it. Sections that genuinely
+   overflow still get the room they need, measured at runtime in
+   setStoryBlockHeights(). `depth` and `textLead` stay per-section because
+   those are motion character, not pacing.
+
+   Overridable from the admin via the `dwell-vh` theme token, which
+   site-content.js parks on window.__siteTokens. Read through a function
+   rather than captured in a const because the token arrives after this
+   file is evaluated. */
+const DEFAULT_DWELL_VH = 20;
+
+function baseDwellVh() {
+  const raw = window.__siteTokens && window.__siteTokens['dwell-vh'];
+  const n = parseFloat(raw);
+  return Number.isFinite(n) && n >= 0 ? n : DEFAULT_DWELL_VH;
+}
 
 const SECTION_MOTION = {
-  'intro-avatar':       { hero: true, depth: 10 },
-  'intro-about':        { hero: true, depth: 10 },
   'childhood':          { depth: 10, textLead: 0.02 },
-  'early-spark':        { depth: 10, textLead: 0.03 },
   'christ':             { depth: 10, textLead: 0.03 },
   'finiq':              { depth: 16, textLead: 0.00 },
-  'why-msc':            { depth: 14, textLead: 0.01 },
   'kings':              { depth: 10, textLead: 0.03 },
   'dissertation':       { depth: 10, textLead: 0.03 },
-  'ai-interest':        { depth: 10, textLead: 0.02 },
   'personal':           { depth: 8,  textLead: 0.04 },
   'projects':           { depth: 16, textLead: 0.00, cards: true },
   'certificates':       { depth: 14, textLead: 0.00, cards: true },
@@ -77,22 +93,11 @@ const SECTION_MOTION = {
   'contact':            { depth: 8,  textLead: 0.02 },
 };
 
-// Auto-scroll state — set to true the moment user touches scroll input
-let autoScrollCancelled  = false;
-let _asBarTimer          = null;  // setTimeout: show loading bar
-let _asScrollTimer       = null;  // setTimeout: execute scroll to FinIQ
-let _asTick              = null;  // setInterval: countdown ticker
-
-/** Permanently cancel the FinIQ auto-scroll and tear down its UI. */
-function cancelAutoScroll() {
-  if (autoScrollCancelled) return;
-  autoScrollCancelled = true;
-  clearTimeout(_asBarTimer);
-  clearTimeout(_asScrollTimer);
-  clearInterval(_asTick);
-  const loading = document.getElementById('aboutLoading');
-  if (loading) loading.classList.remove('active');
-}
+/* ── CV ───────────────────────────────────────────────────────
+   Drop a PDF next to index.html and put its filename here to turn
+   on the "Download CV" button in the hero. Left empty the button is
+   removed rather than left pointing at a 404. */
+const CV_URL = 'Kabir_Mehta_Resume.pdf';
 
 function escapeHtml(str) {
   if (str == null) return '';
@@ -208,11 +213,21 @@ function setStoryBlockHeights() {
      wrongly. documentElement.clientHeight tracks the CSS unit. */
   const vh = document.documentElement.clientHeight || window.innerHeight;
 
+  /* Mobile / reduced motion: no dwell at all. The blocks collapse to their
+     content height and the panels stop being sticky (see the CSS media
+     query), so the page reads as an ordinary document. */
+  if (!motionEnabled()) {
+    document.querySelectorAll('.story-block').forEach(block => {
+      block.style.height = '';
+    });
+    return;
+  }
+
   document.querySelectorAll('.story-block').forEach(block => {
     const panel = block.querySelector('.panel');
     if (!panel) return;
 
-    let extra = BASE_DWELL_VH;
+    let extra = baseDwellVh();
 
     // Card sections: add only the overflow they actually have.
     const inner = panel.querySelector('.panel-inner');
@@ -262,7 +277,7 @@ function initScrollStory() {
  * from the entrance `transform` animation.
  */
 function updateParallax() {
-  if (prefersReducedMotion.matches) {
+  if (!motionEnabled()) {
     updateHeroSequence(true);
     sections.forEach(({ el, inner }) => {
       el.style.setProperty('--panel-stage-y', '0px');
@@ -366,58 +381,32 @@ function updateParallax() {
   });
 }
 
+/**
+ * Hero exit.
+ *
+ * The hero used to be two panels: an avatar-only screen, then a separate
+ * About panel whose name, role and copy were revealed by scroll progress
+ * and then auto-scrolled away on a 10s timer. Nothing above the fold said
+ * who this was. The hero now renders its content immediately and this
+ * function only handles its exit — it fades as you leave, and that is all.
+ */
 function updateHeroSequence(forceComplete = false) {
-  const avatarPanel = document.getElementById('intro-avatar');
-  const avatar = document.getElementById('introAvatar');
-  const avatarPanelInner = document.getElementById('avatarPanelInner');
-  const about = document.getElementById('intro-about');
-  const aboutContent = document.getElementById('aboutPanelInner');
-  const indicator = avatarPanel?.querySelector('.scroll-indicator');
-  const line1 = document.getElementById('nameLine1');
-  const line2 = document.getElementById('nameLine2');
-  const subtitle = document.getElementById('introSubtitle');
-  const aboutPara = document.getElementById('introAboutPara');
-  const underline = document.getElementById('underline-path');
+  const hero = document.getElementById('hero');
+  if (!hero) return;
 
-  if (!avatarPanel || !about) return;
+  const avatar = document.getElementById('introAvatar');
+  const indicator = hero.querySelector('.scroll-indicator');
+  const quip = hero.querySelector('.avatar-quip');
 
   const viewportH = window.innerHeight;
-  const aboutTop = sectionScrollTops.get('intro-about') ?? getAbsoluteTop(about);
-  const heroSpan = Math.max(viewportH * 0.95, aboutTop);
-  const heroProgress = forceComplete ? 1 : clamp(window.scrollY / Math.max(heroSpan, 1));
-  const dockProgress = easeInOutSine(clamp((heroProgress - 0.06) / 0.52));
-  const aboutProgress = easeOutCubic(clamp((heroProgress - 0.16) / 0.42));
+  const exit = forceComplete ? 0 : easeInOutSine(clamp(window.scrollY / Math.max(viewportH * 0.8, 1)));
 
-  avatarPanelInner?.style.setProperty('--hero-avatar-y', '0px');
-  avatarPanelInner?.style.setProperty('--hero-avatar-scale', '1');
-  avatarPanelInner?.style.setProperty('--hero-avatar-opacity', clamp(1 - dockProgress * 1.1).toFixed(3));
-  avatarPanelInner?.style.setProperty('--hero-quip-opacity', clamp(1 - dockProgress * 1.4).toFixed(3));
   avatar?.style.setProperty('--avatar-screen-x', '0px');
-  avatar?.style.setProperty('--avatar-screen-y', `${lerp(0, -24, dockProgress).toFixed(2)}px`);
-  avatar?.style.setProperty('--avatar-screen-scale', lerp(1, 0.88, dockProgress).toFixed(3));
-  avatar?.style.setProperty('--hero-avatar-tilt', `${lerp(0, -8, dockProgress).toFixed(2)}deg`);
-  indicator?.style.setProperty('--hero-indicator-opacity', clamp(1 - dockProgress * 1.6).toFixed(3));
-
-  aboutContent?.style.setProperty('--about-shift-y', `${lerp(52, 0, aboutProgress).toFixed(2)}px`);
-  aboutContent?.style.setProperty('--about-opacity', clamp(0.1 + aboutProgress * 0.9).toFixed(3));
-
-  line1?.classList.toggle('visible', aboutProgress > 0.08);
-  line2?.classList.toggle('visible', aboutProgress > 0.18);
-  subtitle?.classList.toggle('visible', aboutProgress > 0.44);
-  aboutPara?.classList.toggle('visible', aboutProgress > 0.56);
-
-  updateRevealElement(line1, clamp((aboutProgress - 0.02) * 1.28));
-  updateRevealElement(line2, clamp((aboutProgress - 0.14) * 1.28));
-
-  if (underline) {
-    underline.style.strokeDashoffset = String(1 - clamp((aboutProgress - 0.22) * 1.4));
-    underline.classList.toggle('drawn', aboutProgress > 0.84);
-  }
-
-  if (!aboutSequenceStarted && (forceComplete || aboutProgress > 0.72)) {
-    runAboutAnimation();
-    aboutSequenceStarted = true;
-  }
+  avatar?.style.setProperty('--avatar-screen-y', `${lerp(0, -18, exit).toFixed(2)}px`);
+  avatar?.style.setProperty('--avatar-screen-scale', lerp(1, 0.94, exit).toFixed(3));
+  avatar?.style.setProperty('--hero-avatar-tilt', `${lerp(0, -5, exit).toFixed(2)}deg`);
+  quip?.style.setProperty('--hero-quip-opacity', clamp(1 - exit * 1.6).toFixed(3));
+  indicator?.style.setProperty('--hero-indicator-opacity', clamp(1 - exit * 2.2).toFixed(3));
 }
 
 
@@ -439,97 +428,10 @@ function initReveal() {
 
   document.querySelectorAll('.panel-inner').forEach(el => {
     const panel = el.closest('.panel');
-    if (panel && (panel.id === 'intro-avatar' || panel.id === 'intro-about')) return;
+    if (panel && panel.id === 'hero') return;
     observer.observe(el);
   });
 }
-
-
-/* ─────────────────────────────────────────────────────────────
-   5. INTRO ANIMATIONS
-───────────────────────────────────────────────────────────── */
-
-/** S1: avatar spins in on load */
-function runAvatarAnimation() {
-  const avatar = document.getElementById('introAvatar');
-  if (avatar) setTimeout(() => avatar.classList.add('visible'), 200);
-}
-
-/** S2: watch for intro-about entering viewport */
-function initAboutAnimation() {
-  updateHeroSequence();
-}
-
-function runAboutAnimation() {
-  if (runAboutAnimation.started) return;
-  runAboutAnimation.started = true;
-
-  const line1     = document.getElementById('nameLine1');
-  const line2     = document.getElementById('nameLine2');
-  const underln   = document.getElementById('underline-path');
-  const subtitle  = document.getElementById('introSubtitle');
-  const para      = document.getElementById('introAboutPara');
-  const loading   = document.getElementById('aboutLoading');
-  const barFill   = document.getElementById('loadingBarFill');
-  const countdown = document.getElementById('loadingCountdown');
-
-  if (line1) line1.classList.add('visible');
-  if (line2) line2.classList.add('visible');
-  if (underln) setTimeout(() => underln.classList.add('drawn'), 220);
-  if (subtitle) subtitle.classList.add('visible');
-  if (para) para.classList.add('visible');
-
-  // Loading bar → auto-scroll to FinIQ
-  _asBarTimer = setTimeout(() => {
-    if (autoScrollCancelled) return;
-
-    if (loading) loading.classList.add('active');
-
-    if (barFill) {
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        barFill.classList.add('running');
-      }));
-    }
-
-    let secsLeft = 10;
-    _asTick = setInterval(() => {
-      if (autoScrollCancelled) { clearInterval(_asTick); return; }
-      secsLeft--;
-      if (countdown) {
-        countdown.textContent = secsLeft > 0
-          ? `Auto-scrolling in ${secsLeft}s`
-          : 'Scrolling now…';
-      }
-      if (secsLeft <= 0) clearInterval(_asTick);
-    }, 1000);
-
-    // Scroll to FinIQ using the cached absolute position
-    _asScrollTimer = setTimeout(() => {
-      if (autoScrollCancelled) return;
-
-      const finiqTop = sectionScrollTops.get('finiq');
-      if (finiqTop != null) {
-        window.scrollTo({ top: finiqTop, behavior: 'smooth' });
-      } else {
-        // Fallback: find block containing finiq
-        const finiqEl = document.getElementById('finiq');
-        if (finiqEl) {
-          const block = finiqEl.closest('.story-block') || finiqEl;
-          window.scrollTo({ top: getAbsoluteTop(block), behavior: 'smooth' });
-        }
-      }
-
-      // Show one-time context overlay after scroll settles
-      setTimeout(() => {
-        if (typeof window.__showFiniqOverlay === 'function') {
-          window.__showFiniqOverlay();
-        }
-      }, 900);
-    }, 10000);
-
-  }, 1700);
-}
-
 
 /* ─────────────────────────────────────────────────────────────
    6. PROGRESS BAR
@@ -600,12 +502,53 @@ function scrollToSection(targetId) {
   }
 }
 
+/* Sections added in the editor get their nav button after this has
+   already run, so site-content.js needs to reach the same jump logic. */
+window.scrollToSection = scrollToSection;
+
 function initTimelineNav() {
   document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', () => scrollToSection(item.dataset.target));
   });
 
   updateActiveNav();
+}
+
+/** Hero call-to-action buttons — same jump behaviour as the side nav. */
+function initJumpButtons() {
+  document.querySelectorAll('.hero-btn[data-target]').forEach(btn => {
+    btn.addEventListener('click', () => scrollToSection(btn.dataset.target));
+  });
+
+  /* The skip link is a real anchor so it works before JS runs; once JS is
+     up, route it through scrollToSection so it lands on the story-block
+     top rather than the sticky panel's own offset. */
+  const skip = document.querySelector('.skip-link');
+  if (skip) {
+    skip.addEventListener('click', (e) => {
+      e.preventDefault();
+      scrollToSection(skip.getAttribute('href').slice(1));
+    });
+  }
+}
+
+/**
+ * Show the CV button only when CV_URL actually points at a file.
+ *
+ * This is the offline fallback only. site-content.js owns the button
+ * whenever the database is reachable, and stamps data-managed on it —
+ * without that check this would run afterwards and wipe the stored
+ * value back to the empty constant below. It also hides rather than
+ * removes, because a removed element cannot be filled in later.
+ */
+function initCvLink() {
+  const link = document.getElementById('heroCvBtn');
+  if (!link || link.dataset.managed === 'true') return;
+
+  if (!CV_URL) { link.hidden = true; return; }
+  link.href = CV_URL;
+  link.setAttribute('download', '');
+  link.hidden = false;
 }
 
 
@@ -617,16 +560,31 @@ function initMobileMenu() {
   const nav    = document.getElementById('mob-nav');
   if (!btn || !nav) return;
 
+  /* aria-hidden has to track the open state. The markup ships it as
+     "true" for the closed state and nothing used to clear it, so the
+     menu stayed hidden from assistive tech even while it was on screen
+     — and an aria-hidden container full of focusable buttons is invalid
+     ARIA besides. The CSS visibility rule handles the tab order; this
+     keeps the accessibility tree honest. */
   function openMenu() {
     nav.classList.add('open');
+    nav.setAttribute('aria-hidden', 'false');
     btn.setAttribute('aria-expanded', 'true');
     document.body.style.overflow = 'hidden';
+    /* Move focus into the overlay so a keyboard user lands on the menu
+       they just opened rather than staying behind it. */
+    nav.querySelector('.mob-nav-item')?.focus();
   }
 
-  function closeMenu() {
+  function closeMenu({ restoreFocus = true } = {}) {
     nav.classList.remove('open');
+    nav.setAttribute('aria-hidden', 'true');
     btn.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
+    /* Focus would otherwise be stranded on a button that just became
+       invisible, which drops the keyboard user back to the top of the
+       document on their next Tab. */
+    if (restoreFocus && nav.contains(document.activeElement)) btn.focus();
   }
 
   btn.addEventListener('click', () => {
@@ -642,7 +600,7 @@ function initMobileMenu() {
   nav.querySelectorAll('.mob-nav-item').forEach(item => {
     item.addEventListener('click', () => {
       const targetId = item.dataset.target;
-      closeMenu();
+      closeMenu({ restoreFocus: false });
       setTimeout(() => scrollToSection(targetId), 300);
     });
   });
@@ -651,69 +609,6 @@ function initMobileMenu() {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && nav.classList.contains('open')) closeMenu();
   });
-}
-
-
-/* ─────────────────────────────────────────────────────────────
-   9. EXPAND / COLLAPSE BUTTONS
-───────────────────────────────────────────────────────────── */
-function initExpandButtons() {
-  document.querySelectorAll('.expand-btn').forEach(btn => {
-    const expandable = document.getElementById(btn.dataset.target);
-    if (!expandable) return;
-
-    btn.addEventListener('click', () => {
-      const isOpen = expandable.classList.contains('open');
-      if (isOpen) {
-        expandable.style.maxHeight = '0';
-        expandable.classList.remove('open');
-        btn.setAttribute('aria-expanded', 'false');
-        expandable.setAttribute('aria-hidden', 'true');
-      } else {
-        expandable.classList.add('open');
-        expandable.style.maxHeight = expandable.scrollHeight + 'px';
-        btn.setAttribute('aria-expanded', 'true');
-        expandable.setAttribute('aria-hidden', 'false');
-      }
-    });
-  });
-}
-
-
-/* ─────────────────────────────────────────────────────────────
-   10. FINIQ CONTEXT OVERLAY
-   One-time session overlay triggered after auto-scroll to FinIQ.
-───────────────────────────────────────────────────────────── */
-function initFiniqOverlay() {
-  const overlay = document.getElementById('finiq-overlay');
-  const dismiss = overlay?.querySelector('.finiq-overlay__dismiss');
-  if (!overlay) return;
-
-  function showOverlay() {
-    if (sessionStorage.getItem('finiqOverlayShown')) return;
-    sessionStorage.setItem('finiqOverlayShown', '1');
-    overlay.setAttribute('aria-hidden', 'false');
-    setTimeout(() => overlay.classList.add('visible'), 300);
-    setTimeout(hideOverlay, 5000);
-  }
-
-  function hideOverlay() {
-    overlay.classList.add('hiding');
-    overlay.classList.remove('visible');
-    setTimeout(() => {
-      overlay.classList.remove('hiding');
-      overlay.setAttribute('aria-hidden', 'true');
-    }, 600);
-  }
-
-  if (dismiss) dismiss.addEventListener('click', hideOverlay);
-
-  // Dismiss on any scroll once visible
-  window.addEventListener('scroll', () => {
-    if (overlay.classList.contains('visible')) hideOverlay();
-  }, { passive: true });
-
-  window.__showFiniqOverlay = showOverlay;
 }
 
 
@@ -879,8 +774,12 @@ function buildProjectCard(p) {
     ? `<div class="card-actions">${actions.join('')}</div>`
     : '';
 
+  /* data-row-id lets the site editor map a click on this card back to
+     its database row. Absent for fallback cards, which have no row. */
+  const rowId = p.id ? ` data-row-id="${escapeHtml(p.id)}" data-row-table="projects"` : '';
+
   return `
-    <article class="tl-card">
+    <article class="tl-card"${rowId}>
       <h3 class="card-title">${title}</h3>
       ${desc       ? `<p class="card-desc">${desc}</p>` : ''}
       ${tagsHtml}
@@ -980,89 +879,16 @@ function buildCertCard(c) {
     ? `<div class="card-actions">${actions.join('')}</div>`
     : '';
 
+  const rowId = c.id ? ` data-row-id="${escapeHtml(c.id)}" data-row-table="certificates"` : '';
+
   return `
-    <article class="tl-card">
+    <article class="tl-card"${rowId}>
       ${badgeHtml}
       <h3 class="card-title">${title}</h3>
       ${issuer      ? `<p class="card-issuer">${issuer}</p>` : ''}
       ${dateHtml}
       ${actionsHtml}
     </article>`;
-}
-
-
-/* ─────────────────────────────────────────────────────────────
-   13. AUTO-SCROLL GUARD
-   Cancels the FinIQ auto-scroll only when the user has scrolled
-   ≥ 50 % into the section immediately after the About panel.
-   Minor / accidental scrolls that stay within About are ignored.
-───────────────────────────────────────────────────────────── */
-function initAutoScrollGuard() {
-  /* Cancel on the first sign of deliberate user input.
-
-     This used to cancel only once the reader had scrolled 50% into the
-     section AFTER About, which meant the sole way to keep reading About
-     was to leave it — anyone who stopped to actually read got yanked to
-     FinIQ mid-sentence, and the panel looked broken. Auto-advance is for
-     a visitor who is not engaging; the moment someone scrolls, they are.
-
-     These listen for user intent (wheel, touch, keys) rather than the
-     `scroll` event, because `scroll` also fires for the auto-scroll's own
-     smooth animation and for programmatic nav jumps. */
-  const INTENT_KEYS = new Set([
-    'ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ', 'Spacebar'
-  ]);
-
-  function onIntent(e) {
-    if (e.type === 'keydown' && !INTENT_KEYS.has(e.key)) return;
-    cancelAutoScroll();
-    teardown();
-  }
-
-  function teardown() {
-    window.removeEventListener('wheel', onIntent);
-    window.removeEventListener('touchstart', onIntent);
-    window.removeEventListener('keydown', onIntent);
-  }
-
-  window.addEventListener('wheel', onIntent, { passive: true });
-  window.addEventListener('touchstart', onIntent, { passive: true });
-  window.addEventListener('keydown', onIntent);
-}
-
-/* ─────────────────────────────────────────────────────────────
-   14. SIDEBAR VISIBILITY (auto-hide on idle)
-   Desktop only — mobile nav is always visible via overlay.
-───────────────────────────────────────────────────────────── */
-function initSidebarVisibility() {
-  const nav = document.getElementById('side-nav');
-  if (!nav) return;
-
-  let idleTimer = null;
-  const IDLE_DELAY = 1500; // ms after scroll stops
-
-  function goIdle() { nav.classList.add('nav-idle'); }
-
-  function goActive() {
-    nav.classList.remove('nav-idle');
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(goIdle, IDLE_DELAY);
-  }
-
-  // Start idle — nav is hidden until first scroll
-  nav.classList.add('nav-idle');
-
-  window.addEventListener('scroll', goActive, { passive: true });
-
-  // Reveal on hover so users can click without scrolling first
-  nav.addEventListener('mouseenter', () => {
-    clearTimeout(idleTimer);
-    nav.classList.remove('nav-idle');
-  });
-
-  nav.addEventListener('mouseleave', () => {
-    idleTimer = setTimeout(goIdle, IDLE_DELAY);
-  });
 }
 
 
@@ -1219,18 +1045,12 @@ function boot() {
   // ── Reveal animations ─────────────────────────────────────
   initReveal();
 
-  // ── Intro sequence ────────────────────────────────────────
-  runAvatarAnimation();
-  initAboutAnimation();
-
   // ── UI ────────────────────────────────────────────────────
   initProgressBar();
   initTimelineNav();
+  initJumpButtons();
+  initCvLink();
   initMobileMenu();
-  initSidebarVisibility();
-  initAutoScrollGuard();
-  initExpandButtons();
-  initFiniqOverlay();
 
   // ── Data ──────────────────────────────────────────────────
   loadProjects();
@@ -1249,6 +1069,21 @@ if (document.readyState === 'loading') {
 // Google Fonts (Cormorant Garamond) can reflow text and shift section
 // positions after DOMContentLoaded, causing nav clicks to land wrong.
 window.addEventListener('load', () => {
+  computeSectionPositions();
+  updateParallax();
+  updateActiveNav();
+});
+
+/* Content from Supabase changes how tall every panel is and can reorder
+   or hide sections outright, so everything measured at boot has to be
+   measured again. Fired once by site-content.js. */
+window.addEventListener('site-content-ready', () => {
+  sections = Array.from(document.querySelectorAll('.panel')).map(el => ({
+    el,
+    inner: el.querySelector('.panel-inner, .panel-text'),
+  }));
+  prepareTextReveals();
+  setStoryBlockHeights();
   computeSectionPositions();
   updateParallax();
   updateActiveNav();

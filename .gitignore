@@ -1,6 +1,16 @@
-# Local dev config — not needed for deployment
+# Local dev config
 .claude/
 
-# Secrets — never commit these
+# Real secrets. The service_role key must never reach the browser or
+# the repo — it bypasses every row level security policy.
 .env
-config.js
+
+# config.js is deliberately NOT ignored.
+#
+# It holds the Supabase URL and the *anon* key. The anon key is
+# published to every visitor's browser by design; it is what the site
+# uses to read content. Security comes from the row level security
+# policies in supabase.sql and admin-schema.sql, not from hiding it.
+#
+# Keeping it out of the repo meant a fresh clone or an automated deploy
+# produced a site that silently fell back to placeholder content.

@@ -10,10 +10,10 @@
    7.  Mobile hamburger & nav overlay
    8.  Panel system — sticky cover
    9.  Story-block scroll architecture
-   10. Intro avatar section
+   10. Hero section
    11. Scroll indicator (bouncing chevron)
-   12. Intro about section
-   13. Expand button + expandable block
+   12. Hero underline
+   13. Panel body
    14. Typography helpers
    15. Global action button system
    16. Cards grid — dark (Projects)
@@ -21,9 +21,8 @@
    18. Newsletter form
    19. Footer & links
    20. Contact section
-   21. FinIQ context overlay
-   22. Responsive (mobile ≤ 767px)
-   23. Reduced motion
+   21. Responsive (mobile ≤ 767px)
+   22. Reduced motion
    ============================================================ */
 
 
@@ -31,6 +30,13 @@
    1. CSS CUSTOM PROPERTIES
 ───────────────────────────────────────────────────────────── */
 :root {
+  /* ── Themeable tokens ──────────────────────────────────────
+     Every value in this block is overridable from the admin page.
+     site-content.js sets the same custom property inline on :root,
+     which beats this rule, so the values here are the defaults the
+     site falls back to when Supabase is unreachable. The admin's
+     THEME_TOKENS map decides which site_theme row drives which
+     property. */
   --dark:        #111111;
   --cream:       #edeade;
   --green:       #1e3320;
@@ -46,6 +52,16 @@
   --panel-pad-x: 8vw;
   --panel-pad-y: 8vh;
   --content-max: 640px;
+
+  /* Multipliers, so type can be scaled without rewriting clamps. */
+  --title-scale:     1;
+  --body-scale:      1;
+  --hero-name-scale: 1;
+
+  /* Surface transparency. */
+  --nav-alpha:    0.58;
+  --card-alpha:   0.04;
+  --media-shadow: 0.28;
 }
 
 
@@ -57,6 +73,11 @@
   margin: 0;
   padding: 0;
 }
+
+/* The `hidden` attribute is only a `display: none` default, so any rule
+   that sets `display` silently overrides it — which is how a hidden
+   "Download CV" button rendered anyway. Make the attribute win. */
+[hidden] { display: none !important; }
 
 html {
   font-size: 16px;
@@ -98,6 +119,28 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 ───────────────────────────────────────────────────────────── */
 #panels-wrap { position: relative; }
 
+/* Keyboard escape hatch — hidden until focused, then jumps past the
+   whole narrative to the work. First tab stop on the page. */
+.skip-link {
+  position: fixed;
+  top: 0.6rem;
+  left: 0.6rem;
+  z-index: 1200;
+  transform: translateY(-160%);
+  background: var(--green-light);
+  color: var(--dark);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 0.7rem 1.2rem;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: transform 0.25s var(--ease);
+}
+
+.skip-link:focus-visible { transform: translateY(0); }
+
 
 /* ─────────────────────────────────────────────────────────────
    5. PROGRESS BAR
@@ -128,45 +171,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   pointer-events: auto;
 }
 
-/* Thin vertical line shown when sidebar is idle */
-#side-nav::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 12px;
-  bottom: 12px;
-  width: 2px;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgba(237, 234, 222, 0.38) 25%,
-    rgba(237, 234, 222, 0.38) 75%,
-    transparent
-  );
-  border-radius: 1px;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  pointer-events: none;
-}
-
-/* Idle state: fade nav pill out, show thin line */
-#side-nav.nav-idle > ul {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
-}
-
-#side-nav.nav-idle::after {
-  opacity: 1;
-}
-
-/* Active state: ensure full opacity on the ul */
-#side-nav:not(.nav-idle) > ul {
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity 0.35s ease;
-}
-
+/* The nav used to fade itself out 1.5s after scrolling stopped, leaving a
+   thin line as its only trace. On a page this long the nav IS the escape
+   hatch — NN/G's scrolljacking guidance calls for persistent navigation —
+   so it now stays put. */
 #side-nav ul {
   display: flex;
   flex-direction: column;
@@ -177,7 +185,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   position: relative;
   padding: 0.9rem 0.8rem;
   border-radius: 14px;
-  background: rgba(8, 8, 8, 0.58);
+  background: rgba(8, 8, 8, var(--nav-alpha, 0.58));
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -316,12 +324,21 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s var(--ease);
+  /* `visibility` is what actually takes the closed menu out of play.
+     Opacity alone leaves all eleven buttons in the tab order and in the
+     accessibility tree, so keyboard users tabbed through an invisible
+     menu before reaching any content. Visibility is discrete, so it
+     holds until the fade finishes on the way out and flips immediately
+     on the way in. */
+  visibility: hidden;
+  transition: opacity 0.3s var(--ease), visibility 0s linear 0.3s;
 }
 
 #mob-nav.open {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
+  transition: opacity 0.3s var(--ease), visibility 0s linear 0s;
 }
 
 .mob-nav-list {
@@ -365,8 +382,12 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   height: 100vh;
   overflow: hidden;
   display: flex;
-  align-items: flex-end;
-  padding: var(--panel-pad-y) var(--panel-pad-x);
+  /* Centred, not bottom-anchored: panels now carry their body copy, and
+     flex-end pushes overflowing content off the top of the screen. */
+  align-items: center;
+  /* Right gutter keeps full-width content (contact column, card grids)
+     clear of the side nav, which is now permanently on screen. */
+  padding: var(--panel-pad-y) max(var(--panel-pad-x), 12rem) var(--panel-pad-y) var(--panel-pad-x);
   transform: perspective(2600px) translate3d(var(--panel-stage-x, 0px), var(--panel-stage-y, 0px), 0) rotateY(var(--panel-stage-rotate, 0deg)) scale(var(--panel-stage-scale, 1));
   transform-origin: 22% 50%;
   opacity: var(--panel-stage-opacity, 1);
@@ -429,9 +450,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 /* Big editorial title */
 .panel-title {
   font-family: var(--font-serif);
-  font-size: clamp(3.8rem, 10vw, 11rem);
+  font-size: calc(clamp(2.6rem, 6vw, 5.4rem) * var(--title-scale, 1));
   font-weight: 400;
-  line-height: 0.95;
+  line-height: 0.98;
   letter-spacing: -0.02em;
   margin-bottom: 1.1rem;
 }
@@ -440,10 +461,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 .panel-tagline {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: clamp(0.98rem, 1.5vw, 1.18rem);
+  font-size: calc(clamp(0.98rem, 1.5vw, 1.18rem) * var(--body-scale, 1));
   line-height: 1.55;
   opacity: 0.66;
-  margin-bottom: 2rem;
+  margin-bottom: 1.4rem;
 }
 
 .text-reveal-line {
@@ -474,6 +495,32 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 }
 
 
+/* The hero is the only panel whose sticky containing block is
+   #panels-wrap — every other one is scoped to its own .story-block.
+   `position: sticky` therefore pinned it at the top for the entire
+   length of the document: it stayed painted under every later section,
+   and because panels settle in at 0.86 opacity (see --panel-stage-
+   opacity), the hero's name and avatar ghosted through every single
+   transition. The hero buys no dwell, so it scrolls away like an
+   ordinary block and the stack behind each panel is just the page
+   background. */
+#hero {
+  position: relative;
+  /* The hero is a fixed 100vh with overflow:hidden like every other
+     panel, but it is the only one that has to fit a full copy column,
+     an avatar and a four-button CTA row. On a short window that does
+     not fit: measured 724px of content against 588px of usable space
+     at 900x700, which clipped the CTA row (Download Resume included)
+     and drove it into the scroll indicator. It has no dwell and
+     nothing stacked behind it, so it can grow instead of clipping.
+     The extra bottom padding reserves the indicator's strip so the
+     buttons never sit underneath it. */
+  height: auto;
+  min-height: 100vh;
+  padding-bottom: calc(var(--panel-pad-y) + 5rem);
+}
+
+
 /* ─────────────────────────────────────────────────────────────
    9b. PANEL MEDIA — polaroid photo collage (right side, desktop)
    Cards fade/drift in driven by --panel-progress (set by JS on
@@ -482,7 +529,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 ───────────────────────────────────────────────────────────── */
 .panel-media {
   position: absolute;
-  right: 6vw;
+  /* Clear of the side nav, which is now permanently on screen
+     (2rem inset + roughly 140px of nav). */
+  right: max(6vw, 11rem);
   top: 50%;
   transform: translateY(-50%);
   width: clamp(300px, 30vw, 480px);
@@ -501,7 +550,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   padding: 10px 10px 14px;
   border-radius: 6px;
   border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, var(--media-shadow, 0.28));
   opacity: clamp(0, (var(--panel-progress, 1) - var(--d, 0)) * 5, 1);
   transform:
     translate3d(0, calc((1 - clamp(0, (var(--panel-progress, 1) - var(--d, 0)) * 3, 1)) * 46px), 0)
@@ -524,31 +573,6 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 }
 .media-card--logo img {
   object-fit: contain;
-}
-
-/* Photo gallery inside "Read more" expandables */
-.expand-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-  gap: 0.7rem;
-  margin-top: 1.4rem;
-}
-.expand-gallery figure { margin: 0; }
-.expand-gallery img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  display: block;
-  border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-.expand-gallery figcaption {
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.5;
-  margin-top: 0.35rem;
 }
 
 /* Tablet: no room for the side collage next to the text column,
@@ -577,37 +601,201 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
     height: 84px;
     width: auto;
   }
-  /* Fade the strip out while a "Read more" block is open —
-     expanded content grows upward into the strip's space */
-  .panel:has(.expandable.open) .panel-media {
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  /* The nav no longer fades out, so the text column has to end before it
+     rather than run underneath. */
+  .panel { padding-right: max(var(--panel-pad-x), 10rem); }
+
+  /* Two hero columns plus that gutter leaves the text about 200px wide,
+     so stack instead — the words get the full column.
+     Selectors are #hero-qualified because this block sits above the hero
+     rules in the file and a media query adds no specificity of its own. */
+  #hero .hero-layout {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 1.6rem;
+    padding-right: 0;
   }
+  #hero .hero-text,
+  #hero .hero-avatar-col { flex: none; width: 100%; }
+  #hero .hero-avatar-col { align-items: flex-start; gap: 0.9rem; }
+  #hero .intro-avatar { width: clamp(140px, 22vw, 190px); }
+  #hero .avatar-quip { align-items: flex-start; text-align: left; }
+  #hero .quip-line--1 { font-size: 0.95rem; }
+  #hero .quip-line--2 { font-size: 1.5rem; }
 }
 
 
 /* ─────────────────────────────────────────────────────────────
-   10. INTRO AVATAR (S1)
+   10. HERO (S1)
+   Two columns on desktop: the words on the left, the avatar on the
+   right. Everything renders immediately — no scroll-driven reveal,
+   no auto-advance. A visitor knows who this is before touching the
+   wheel.
 ───────────────────────────────────────────────────────────── */
-#intro-avatar {
-  justify-content: center;
+.panel--hero {
   align-items: center;
+  justify-content: center;
 }
 
-.avatar-panel-inner {
-  max-width: none;
+.hero-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(2rem, 6vw, 5rem);
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.hero-text {
+  flex: 1 1 58%;
+  min-width: 0;
+  max-width: 640px;
+}
+
+.hero-greeting {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  margin-bottom: 0.7rem;
+}
+
+.hero-name {
+  font-family: var(--font-serif);
+  font-size: calc(clamp(3rem, 7vw, 6rem) * var(--hero-name-scale, 1));
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+
+.hero-role {
+  font-family: var(--font-sans);
+  font-size: clamp(0.72rem, 1.05vw, 0.86rem);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green-light);
+  margin-top: 1.1rem;
+}
+
+.hero-pitch {
+  font-size: calc(clamp(0.9rem, 1.15vw, 1.02rem) * var(--body-scale, 1));
+  line-height: 1.72;
+  opacity: 0.72;
+  margin-top: 1.1rem;
+  max-width: 54ch;
+}
+
+/* Three hard facts, scannable without reading the paragraph. */
+.hero-proof {
+  list-style: none;
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hero-proof li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  opacity: 0.62;
+}
+
+.hero-proof li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--green-light);
+}
+
+.hero-proof strong {
+  font-weight: 500;
+  opacity: 1;
+  color: var(--cream);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 2.2rem;
+}
+
+.hero-btn {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 0.8rem 1.5rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.25s var(--ease), color 0.25s var(--ease),
+              border-color 0.25s var(--ease), transform 0.18s var(--ease);
+}
+
+.hero-btn:hover  { transform: translateY(-1px); }
+.hero-btn:active { transform: translateY(0); }
+.hero-btn:focus-visible {
+  outline: 2px solid var(--green-light);
+  outline-offset: 3px;
+}
+
+.hero-btn--primary {
+  background: var(--green-light);
+  color: var(--dark);
+}
+.hero-btn--primary:hover { background: #8fb07c; }
+
+.hero-btn--ghost {
+  background: transparent;
+  color: var(--cream);
+  border-color: rgba(237, 234, 222, 0.28);
+}
+.hero-btn--ghost:hover {
+  border-color: rgba(237, 234, 222, 0.6);
+  background: rgba(237, 234, 222, 0.05);
+}
+
+.hero-btn--text {
+  background: transparent;
+  color: var(--cream);
+  opacity: 0.5;
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+}
+.hero-btn--text:hover { opacity: 0.9; }
+
+.hero-avatar-col {
+  flex: 0 1 34%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  opacity: 1 !important;
-  transform: translate3d(0, var(--hero-avatar-y, 0px), 0) scale(var(--hero-avatar-scale, 1)) !important;
-  transition: transform 0.2s linear, opacity 0.2s linear;
-  opacity: var(--hero-avatar-opacity, 1) !important;
+  gap: 1.4rem;
   pointer-events: none;
 }
+
+/* The quip was sized for a screen of its own. Beside the name it is a
+   caption, not the headline — the headline is now the name. */
+.hero-avatar-col .quip-line--1 { font-size: clamp(0.85rem, 1.5vw, 1.15rem); }
+.hero-avatar-col .quip-line--2 { font-size: clamp(1.2rem, 2.3vw, 1.85rem); }
+.hero-avatar-col .intro-avatar { width: clamp(160px, 20vw, 265px); }
 
 .intro-avatar {
   width: clamp(180px, 28vw, 320px);
@@ -772,66 +960,10 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
 
 /* ─────────────────────────────────────────────────────────────
-   12. INTRO ABOUT (S2)
+   12. HERO UNDERLINE
+   The hand-drawn rule under the name. Drawn on load rather than by
+   scroll progress, so it is finished by the time anyone looks.
 ───────────────────────────────────────────────────────────── */
-#intro-about {
-  padding: 0;
-  align-items: stretch;
-  overflow-y: auto; /* allow scroll if content taller than viewport on small screens */
-}
-
-.about-layout {
-  display: flex;
-  width: 100%;
-  min-height: 100%;
-  align-items: stretch;
-}
-
-.about-content {
-  flex: 1;
-  min-width: 0;
-  padding: 7vh 7vw;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  opacity: var(--about-opacity, 0);
-  transform: translate3d(0, var(--about-shift-y, 52px), 0);
-  transition: opacity 0.2s linear, transform 0.2s linear;
-  max-width: 100%;
-}
-
-.intro-greeting {
-  font-family: var(--font-sans);
-  font-size: clamp(0.75rem, 1.2vw, 0.9rem);
-  font-weight: 300;
-  letter-spacing: 0.1em;
-  opacity: 0.4;
-  margin-bottom: 0.3rem;
-}
-
-.intro-name-block { margin-bottom: 1.6rem; }
-
-.intro-name {
-  font-family: var(--font-serif);
-  font-size: clamp(4rem, 10vw, 9.5rem);
-  font-weight: 400;
-  line-height: 0.92;
-  letter-spacing: -0.02em;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
-}
-
-.name-line {
-  display: block;
-  opacity: 0;
-  transform: none;
-  transition: opacity 0.7s var(--ease), transform 0.8s var(--ease);
-}
-.name-line.visible { opacity: 1; transform: translateY(0); }
-#nameLine2 { transition-delay: 0.12s; }
-
 .name-underline {
   width: clamp(130px, 34vw, 280px);
   height: auto;
@@ -845,162 +977,147 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   stroke-dashoffset: 1;
   transition: stroke-dashoffset 1s var(--ease);
 }
-#underline-path.drawn { stroke-dashoffset: 0; }
+#underline-path {
+  animation: drawUnderline 1.1s var(--ease) 0.35s both;
+}
 
-.intro-subtitle {
-  font-family: var(--font-sans);
-  font-size: clamp(0.65rem, 1vw, 0.78rem);
-  font-weight: 400;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
-  margin-bottom: 1rem;
-}
-.intro-subtitle.visible { opacity: 0.4; transform: translateY(0); }
-
-.intro-about-para {
-  font-family: var(--font-serif);
-  font-size: clamp(0.93rem, 1.35vw, 1.05rem);
-  font-style: italic;
-  line-height: 1.75;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.7s var(--ease) 0.1s, transform 0.7s var(--ease) 0.1s;
-  color: var(--cream);
-  margin-bottom: 0;
-}
-.intro-about-para.visible { opacity: 0.65; transform: translateY(0); }
-
-/* Loading bar */
-.about-loading {
-  margin-top: 2.2rem;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-.about-loading.active { opacity: 1; transform: translateY(0); }
-
-.loading-msg {
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-  opacity: 0.55;
-  margin-bottom: 0.85rem;
-}
-.loading-bar-track {
-  width: 100%; max-width: 280px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 1px;
-  overflow: hidden;
-  margin-bottom: 0.65rem;
-}
-.loading-bar-fill {
-  height: 100%; width: 0%;
-  background: var(--green-light);
-  border-radius: 1px;
-}
-.loading-bar-fill.running {
-  width: 100%;
-  transition: width 10s linear;
-}
-.loading-countdown {
-  font-family: var(--font-sans);
-  font-size: 0.62rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  opacity: 0.3;
+@keyframes drawUnderline {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
 }
 
 
 /* ─────────────────────────────────────────────────────────────
-   13. EXPAND BUTTON + EXPANDABLE BLOCK
+   13. PANEL BODY
+   Used to be an .expandable behind a "Read more" button. Every
+   section hid its substance that way, which meant nothing on the
+   page could be scanned — you had to click fifteen times to learn
+   anything. The content is simply shown now.
 ───────────────────────────────────────────────────────────── */
-.expand-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.48rem 1.15rem;
-  border: 1px solid currentColor;
-  border-radius: 999px;
+
+/* Role / qualification line under a section title */
+.panel-role {
   font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 500;
-  letter-spacing: 0.05em;
-  background: transparent;
-  opacity: 0.6;
-  transition: background 0.3s ease, opacity 0.3s ease;
-  margin-top: 0.25rem;
-  flex-shrink: 0;
-  /* Ensure good touch target on mobile */
-  min-height: 44px;
-}
-.expand-btn:hover, .expand-btn:focus-visible { opacity: 1; }
-[data-theme="dark"]  .expand-btn:hover { background: rgba(255,255,255,0.06); }
-[data-theme="cream"] .expand-btn:hover { background: rgba(0,0,0,0.05); }
-[data-theme="green"] .expand-btn:hover { background: rgba(255,255,255,0.09); }
-.expand-btn:focus-visible { outline: 2px solid var(--green-light); outline-offset: 3px; }
-.expand-btn .arrow {
-  display: inline-block;
-  transition: transform 0.4s var(--ease);
-  font-style: normal;
-  line-height: 1;
-}
-.expand-btn[aria-expanded="true"] .arrow { transform: rotate(180deg); }
-
-/* Expandable — height animated by JS (scrollHeight), no internal scroll */
-.expandable {
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  margin-top: 0;
-  transition: max-height 0.55s ease, opacity 0.4s ease 0.1s, margin-top 0.3s ease;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-top: -0.4rem;
+  margin-bottom: 0.9rem;
 }
 
-.expandable.open {
-  /* max-height set dynamically by JS to element.scrollHeight */
-  opacity: 1;
-  margin-top: 1.8rem;
-}
-
-.expandable p {
-  font-size: 0.9rem;
+.panel-body {
+  font-size: calc(0.88rem * var(--body-scale, 1));
   line-height: 1.78;
-  margin-bottom: 1rem;
+  opacity: 0.72;
 }
-.expandable p:last-child { margin-bottom: 0; }
 
-.expandable ul, .expandable ol {
-  margin: 0.75rem 0 1rem;
+.panel-body p { margin-bottom: 0.9rem; }
+.panel-body p:last-child { margin-bottom: 0; }
+
+.panel-body ul, .panel-body ol {
   list-style: none;
+  margin: 0 0 0.9rem;
 }
-.expandable ul li, .expandable ol li {
-  font-size: 0.85rem;
-  line-height: 1.72;
-  padding-left: 1.35rem;
+
+.panel-body ul li, .panel-body ol li {
   position: relative;
+  padding-left: 1.1rem;
   margin-bottom: 0.4rem;
+  line-height: 1.72;
 }
-.expandable ul li::before {
-  content: '→';
+
+.panel-body ul li::before {
+  content: '';
   position: absolute;
   left: 0;
-  opacity: 0.4;
-  font-size: 0.7rem;
-  top: 0.22em;
+  top: 0.72em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.45;
 }
 
-.expandable blockquote {
-  margin: 1.2rem 0;
-  padding: 0.85rem 1.3rem;
-  border-left: 2px solid var(--green-light);
+.panel-body blockquote {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 0.98rem;
-  opacity: 0.8;
+  font-size: 1.02rem;
   line-height: 1.6;
+  padding-left: 1rem;
+  border-left: 2px solid currentColor;
+  opacity: 0.8;
+  margin: 1.1rem 0;
+}
+
+.personal-list li {
+  padding-left: 0;
+  line-height: 1.72;
+}
+.personal-list li::before { content: none; }
+
+/* ── Quote layout ──────────────────────────────────────────────
+   One of the shapes available when adding a section in the editor:
+   a single statement holding the screen, no dateline or role line. */
+.panel--quote { align-items: center; justify-content: center; }
+
+.panel-inner--quote {
+  max-width: 900px;
+  text-align: center;
+}
+
+.panel-inner--quote .panel-title {
+  font-size: calc(clamp(1.6rem, 3vw, 2.6rem) * var(--title-scale, 1));
+  opacity: 0.5;
+  margin-bottom: 1.5rem;
+}
+
+.panel-body--quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: calc(clamp(1.6rem, 4vw, 3.2rem) * var(--body-scale, 1));
+  line-height: 1.3;
+  opacity: 0.92;
+}
+
+.panel-body--quote p { margin-bottom: 0.6rem; }
+
+/* The generic blockquote styling would double up the quote marks
+   and the left rule inside an already-quoted panel. */
+.panel-body--quote blockquote {
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  opacity: 1;
+  margin: 0;
+}
+
+
+/* Compact thumbnail strip inside a panel body */
+.mini-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+}
+
+.mini-gallery figure { margin: 0; }
+
+.mini-gallery img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 3px;
+  display: block;
+}
+
+.mini-gallery figcaption {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  opacity: 0.45;
+  margin-top: 0.3rem;
 }
 
 
@@ -1132,7 +1249,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 }
 
 .cards-grid--dark .tl-card {
-  background: rgba(255,255,255,0.04);
+  background: rgba(255,255,255,var(--card-alpha, 0.04));
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 8px;
   padding: 1.6rem;
@@ -1499,68 +1616,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
 
 /* ─────────────────────────────────────────────────────────────
-   21. FINIQ CONTEXT OVERLAY
-───────────────────────────────────────────────────────────── */
-#finiq-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: rgba(15, 27, 16, 0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.55s var(--ease);
-}
-#finiq-overlay.visible { opacity: 1; pointer-events: auto; }
-#finiq-overlay.hiding  { opacity: 0; pointer-events: none; }
-
-.finiq-overlay__inner {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 1.8rem;
-  text-align: center; padding: 0 2rem;
-}
-.finiq-overlay__hint {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: clamp(1rem, 2vw, 1.25rem);
-  color: var(--cream);
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
-  display: flex; align-items: center; gap: 0.7rem;
-}
-#finiq-overlay.visible .finiq-overlay__hint--up   { opacity: 0.85; transform: translateY(0); transition-delay: 0.2s; }
-#finiq-overlay.visible .finiq-overlay__hint--down { opacity: 0.85; transform: translateY(0); transition-delay: 0.4s; }
-.finiq-overlay__arrow { font-style: normal; font-size: 1em; opacity: 0.5; }
-.finiq-overlay__divider { width: 1px; height: 40px; background: rgba(237,233,222,0.2); }
-.finiq-overlay__dismiss {
-  margin-top: 2.8rem;
-  padding: 0.5rem 1.6rem;
-  border: 1px solid rgba(237,233,222,0.32);
-  border-radius: 999px;
-  font-family: var(--font-sans); font-size: 0.7rem;
-  font-weight: 500; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--cream);
-  background: transparent; cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.6s var(--ease) 0.6s, background 0.25s ease, border-color 0.25s ease;
-  min-height: 44px;
-}
-#finiq-overlay.visible .finiq-overlay__dismiss { opacity: 0.52; }
-.finiq-overlay__dismiss:hover {
-  opacity: 1 !important;
-  background: rgba(237,233,222,0.09);
-  border-color: rgba(237,233,222,0.55);
-}
-
-
-/* ─────────────────────────────────────────────────────────────
-   22. RESPONSIVE — MOBILE ≤ 767px
+   21. RESPONSIVE — MOBILE ≤ 767px
 ───────────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
   /* Show hamburger, hide desktop nav */
@@ -1580,28 +1636,53 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
     --panel-pad-y: 5vh;
   }
 
-  /* About section: stack vertically — photo below content */
-  .about-layout {
-    flex-direction: column;
+  /* Scroll effects are off below 768px (see MOTION_MIN_WIDTH in app.js).
+     Panels stop being sticky and stop being transformed, so the page is
+     an ordinary scrolling document — NN/G's advice is to avoid altered
+     scroll behaviour on touch devices altogether. */
+  .panel,
+  .story-block > .panel {
+    position: relative;
+    height: auto;
     min-height: 100vh;
+    transform: none !important;
+    opacity: 1 !important;
+    overflow: visible;
   }
-
-  .about-content {
-    flex: 1;
-    padding: 5vh 6vw 3vh;
-    justify-content: flex-start;
-    padding-top: max(5vh, 3.5rem);
-    max-width: 100%;
+  .story-block { height: auto !important; }
+  .panel-inner {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
   }
+  .text-reveal-inner { opacity: 1; transform: none; }
+  .cards-grid .tl-card { opacity: 1 !important; transform: none !important; }
 
-  /* Compact name on mobile */
-  .intro-name { font-size: clamp(3rem, 11vw, 5rem); }
+  /* Hero: stack, avatar above the words. Sized so the primary call to
+     action still lands above the fold on a 375x812 phone — the point of
+     the hero is that nothing important needs a scroll. */
+  .hero-layout {
+    flex-direction: column-reverse;
+    gap: 1.2rem;
+    padding-right: 0;
+  }
+  .hero-text, .hero-avatar-col { flex: none; width: 100%; }
+  .hero-avatar-col { gap: 0.8rem; }
+  .hero-name { font-size: clamp(2.6rem, 11vw, 4rem); }
+  .hero-pitch { margin-top: 0.9rem; line-height: 1.62; }
+  .hero-proof { margin-top: 1rem; gap: 0.35rem; }
+  .hero-actions { gap: 0.5rem; margin-top: 1.3rem; }
+  .hero-btn { flex: 1 1 auto; justify-content: center; }
+  .hero-btn--text { flex-basis: 100%; }
+  .hero-avatar-col .quip-line--1 { font-size: clamp(0.8rem, 3.6vw, 1rem); }
+  .hero-avatar-col .quip-line--2 { font-size: clamp(1.15rem, 5.4vw, 1.6rem); }
+  .hero-avatar-col .intro-avatar { width: clamp(120px, 34vw, 165px); }
 
-  /* Hide loading bar countdown on mobile — auto-scroll is desktop-oriented */
-  .about-loading { display: none; }
+  /* The scroll cue sat over the hero's buttons once the hero had buttons. */
+  #hero .scroll-indicator { display: none; }
 
   /* Smaller titles */
-  .panel-title { font-size: clamp(2.8rem, 11vw, 5rem); }
+  .panel-title { font-size: clamp(2.4rem, 10vw, 4rem); }
 
   /* Newsletter */
   .newsletter-form__row { flex-direction: column; }
@@ -1614,33 +1695,37 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   .card-actions { gap: 0.4rem; }
   .action-btn   { font-size: 0.7rem; padding: 0.5rem 0.9rem; min-height: 42px; }
 
-  /* Overlay text */
-  .finiq-overlay__hint { font-size: 0.95rem; }
-
   /* Scroll indicator centred under avatar */
   .scroll-indicator { bottom: 2rem; }
 
-  /* Story panels: allow internal scroll when expanded content overflows.
-     margin-top:auto keeps content bottom-anchored when it fits, but
-     unlike align-items:flex-end it stays reachable when it overflows.
-     Scoped to story-block panels — hero/about/wide panels manage their own layout. */
-  .story-block .panel:not(.panel--wide) {
-    overflow-y: auto;
+  /* Panels grow with their content now rather than scrolling inside
+     themselves, so the body copy is reachable by ordinary page scroll.
+     Column direction puts the photo strip above the text instead of
+     beside it. */
+  .panel {
+    flex-direction: column;
     align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: 12vh;
+    padding-bottom: 8vh;
+    /* No side nav down here, so no gutter needed. */
+    padding-right: var(--panel-pad-x);
   }
-  .story-block .panel:not(.panel--wide) .panel-inner { margin-top: auto; }
 
-  /* Panel media — compact strip pinned to the top of the panel */
+  /* Panel media — a compact strip in normal flow, above the text.
+     It used to be absolutely positioned over the top of the panel, which
+     worked while the copy was bottom-anchored; now that panels are plain
+     document blocks starting at the top, that overlapped the title. */
   .panel-media {
-    top: calc(var(--panel-pad-y) + 2.5rem);
-    left: var(--panel-pad-x);
-    right: auto;
+    position: static;
+    inset: auto;
     transform: none;
-    width: auto;
+    width: 100%;
     height: auto;
     display: flex;
     gap: 0.6rem;
     align-items: flex-start;
+    margin-bottom: 1.6rem;
   }
   .media-card {
     position: static;
@@ -1656,15 +1741,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   /* Keep the strip to two cards on small screens */
   .panel-media .media-card:nth-child(n+3) { display: none; }
 
-  /* Fade the strip out while a "Read more" block is open —
-     expanded content grows upward into the strip's space */
-  .panel:has(.expandable.open) .panel-media {
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-  }
 
-  .expand-gallery { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+  .mini-gallery { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
 }
 
 /* Slightly larger breakpoint for tablets */
@@ -1675,7 +1753,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
 
 /* ─────────────────────────────────────────────────────────────
-   23. REDUCED MOTION
+   22. REDUCED MOTION
 ───────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -1687,8 +1765,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
     transform: none !important;
     opacity: 1 !important;
   }
-  .panel-inner, .intro-avatar, .name-line,
-  .intro-subtitle, .intro-about-para {
+  .panel-inner, .intro-avatar, .hero-text {
     opacity: 1;
     transform: none;
     filter: none;
@@ -1697,7 +1774,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   .text-reveal-inner { opacity: 1; transform: none; }
   .cards-grid .tl-card { opacity: 1; transform: none; }
   .media-card { opacity: 1; transform: rotate(var(--tilt, 0deg)); }
-  #underline-path { stroke-dashoffset: 0; }
+  #underline-path { stroke-dashoffset: 0; animation: none; }
   .scroll-indicator__chevron { animation: none; opacity: 0.7; }
   .scroll-indicator__arrow::before,
   .scroll-indicator__arrow::after { animation: none; opacity: 0.4; }
