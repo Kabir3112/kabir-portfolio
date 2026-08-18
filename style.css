@@ -411,12 +411,26 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 .panel-inner {
   max-width: var(--content-max);
   width: 100%;
-  opacity: var(--panel-opacity, 0);
-  transform: translate3d(0, var(--panel-shift-y, 32px), 0) scale(var(--panel-scale, 1));
+  /* Defaults are the *pre-JS* state, so they must be readable. This
+     was opacity 0 with a 32px offset, which meant every panel stayed
+     blank until app.js booted and set --panel-opacity — scroll during
+     load and you fell through empty coloured screens. app.js sets
+     .js-motion on <html> the moment it starts, and the rule below
+     hands the entrance animation back to it. */
+  opacity: var(--panel-opacity, 1);
+  transform: translate3d(0, var(--panel-shift-y, 0px), 0) scale(var(--panel-scale, 1));
   filter: blur(var(--panel-blur, 0px));
   transform-origin: left bottom;
   will-change: transform, opacity, filter;
   transition: opacity 0.2s linear, transform 0.2s linear, filter 0.2s linear;
+}
+
+/* Only once JS is confirmed running do the panels start hidden and
+   animate in. If app.js never loads, the defaults above leave every
+   panel readable rather than invisible. */
+.js-motion .panel-inner {
+  opacity: var(--panel-opacity, 0);
+  transform: translate3d(0, var(--panel-shift-y, 32px), 0) scale(var(--panel-scale, 1));
 }
 
 .panel-inner.in-view {

@@ -48,6 +48,14 @@ let sections          = [];  // { el, inner } for all .panel elements
 let sectionScrollTops = new Map(); // cached absolute scroll positions
 let scrollRAF         = null;
 
+/* Tell the stylesheet that JS is alive, so .panel-inner may start
+   hidden and animate in. Set at parse time rather than in boot() so
+   the panels never flash visible first. Reduced motion keeps the
+   readable defaults. */
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.documentElement.classList.add('js-motion');
+}
+
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 /* Scroll effects are desktop-only. On a phone the dwell and the parallax

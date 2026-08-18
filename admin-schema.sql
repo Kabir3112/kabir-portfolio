@@ -332,7 +332,7 @@ insert into site_settings (key, value) values
   ('hero.cta_primary', 'See my work'),
   ('hero.cta_contact', 'Get in touch'),
   ('hero.cta_story',   'Read my story'),
-  ('hero.avatar_url',  'Avatar/face.png'),
+  ('hero.avatar_url',  'Avatar/face.webp'),
 
   ('cv.url',           'Kabir_Mehta_Resume.pdf'),
   ('cv.label',         'Download Resume'),
@@ -379,15 +379,15 @@ on conflict (key) do nothing;
 --  x/y/w/tilt match the inline custom properties currently in
 --  index.html, so the seeded layout is pixel-identical to today's.
 insert into site_media (section_key, placement, image_url, alt, caption, x, y, w, tilt, aspect, delay, is_logo, sort_order) values
-  ('childhood', 'collage', 'images/School.jpeg',      'Shelf of school trophies from Amity International School', null,  0,  2, 76, -3,   '16/9', 0,    false, 10),
-  ('childhood', 'collage', 'images/AVTE.jpeg',        'Academic award trophies for maths, accounts and English', null, 26, 36, 62,  2.5, '4/3',  0.05, false, 20),
+  ('childhood', 'collage', 'images/School.webp',      'Shelf of school trophies from Amity International School', null,  0,  2, 76, -3,   '16/9', 0,    false, 10),
+  ('childhood', 'collage', 'images/AVTE.webp',        'Academic award trophies for maths, accounts and English', null, 26, 36, 62,  2.5, '4/3',  0.05, false, 20),
   ('childhood', 'collage', 'images/SteveJobs.webp',   'Steve Jobs holding an iPhone',                            null,  2, 66, 56, -2,   '9/8',  0.1,  false, 30),
 
-  ('childhood', 'gallery', 'images/Olympiad.jpeg',    'Maths Olympiad medals',                                   'Olympiad medals',   0, 0, 0, 0, '1/1', 0, false, 10),
-  ('childhood', 'gallery', 'images/Olympiad1.jpeg',   'International Olympiad of Mathematics certificate',        'IOM certificate',   0, 0, 0, 0, '1/1', 0, false, 20),
-  ('childhood', 'gallery', 'images/BrainOBrain2.jpeg','Brainobrain national abacus champion certificate',         'Abacus champion',   0, 0, 0, 0, '1/1', 0, false, 30),
-  ('childhood', 'gallery', 'images/Soccer.jpeg',      'Soccer academy medal',                                    'Soccer days',       0, 0, 0, 0, '1/1', 0, false, 40),
-  ('childhood', 'gallery', 'images/Tennis.jpeg',      'Fort Knox tennis tournament certificate',                 'Tennis tournament', 0, 0, 0, 0, '1/1', 0, false, 50),
+  ('childhood', 'gallery', 'images/Olympiad.webp',    'Maths Olympiad medals',                                   'Olympiad medals',   0, 0, 0, 0, '1/1', 0, false, 10),
+  ('childhood', 'gallery', 'images/Olympiad1.webp',   'International Olympiad of Mathematics certificate',        'IOM certificate',   0, 0, 0, 0, '1/1', 0, false, 20),
+  ('childhood', 'gallery', 'images/BrainOBrain2.webp','Brainobrain national abacus champion certificate',         'Abacus champion',   0, 0, 0, 0, '1/1', 0, false, 30),
+  ('childhood', 'gallery', 'images/Soccer.webp',      'Soccer academy medal',                                    'Soccer days',       0, 0, 0, 0, '1/1', 0, false, 40),
+  ('childhood', 'gallery', 'images/Tennis.webp',      'Fort Knox tennis tournament certificate',                 'Tennis tournament', 0, 0, 0, 0, '1/1', 0, false, 50),
 
   ('christ',    'collage', 'images/Christ.webp',      'Christ University crest',            null, 20, 28, 52,  2,   '1/1',    0,    true,  10),
   ('finiq',     'collage', 'images/FinIQ.webp',       'FinIQ logo',                         null, 14, 32, 64, -2,   '2.2/1',  0,    true,  10),
