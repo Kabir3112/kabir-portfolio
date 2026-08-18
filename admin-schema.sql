@@ -241,7 +241,7 @@ The tech obsession started with reading about Steve Jobs in middle school. Follo
 ('kings', 'story', 'Now',
  'London, UK · Sep 2025 to Sep 2026', 'What I''m Doing Now', 'MSc Management and Technological Change · King''s College London',
  'When curiosity gets serious, you move cities.',
- 'A year in London on the MSc, after two years building structured-products platforms in Bengaluru. I wanted global perspectives, a deeper understanding of tech transformation, and a head start on an AI-driven future. New people, new cultures, new experiences: that part needed no convincing.
+ 'A year in London on the MSc, after two years at FinIQ building structured-products platforms for global banks. I wanted global perspectives, a deeper understanding of tech transformation, and a head start on an AI-driven future. New people, new cultures, new experiences: that part needed no convincing.
 
 - Change management & leadership in tech environments
 - Design sprints & rapid prototyping
@@ -257,7 +257,7 @@ The tech obsession started with reading about Steve Jobs in middle school. Follo
 - How managers respond when expertise shifts
 - Qualitative research, stakeholder interviews, extensive literature review
 
-The interest itself started at a desk in Bengaluru, where automating regression testing turned curiosity into something I wanted to pursue properly. Certified in AI Fluency: Foundation & Framework (Anthropic), and exploring AI tools daily since.',
+The interest itself started at FinIQ, where automating regression testing turned curiosity into something I wanted to pursue properly. Certified in AI Fluency: Foundation & Framework (Anthropic), and exploring AI tools daily since.',
  'cream', 40),
 
 ('personal', 'story', 'Personal',
