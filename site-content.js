@@ -540,14 +540,14 @@
   }
 
   async function fetchAll() {
-    const url = window.SUPABASE_URL;
-    const key = window.SUPABASE_ANON_KEY;
-    if (!window.supabase || !url || !key) return null;
+    /* Nothing here is worth 207 KB of supabase-js when a previous visit
+       already established the tables are not there. loadSupabase()
+       pulls the library only at this point, not on every page view. */
+    if (!window.supabaseWorthTrying || !window.supabaseWorthTrying('siteContent')) return null;
 
-    /* Shared with app.js — see the note there on why this must not be
-       a second createClient() call. */
-    const db = window.__sbClient
-      || (window.__sbClient = window.supabase.createClient(url, key));
+    const db = window.loadSupabase ? await window.loadSupabase() : null;
+    if (!db) return null;
+
     const [sections, settings, theme, media] = await Promise.all([
       db.from('site_sections').select('*'),
       db.from('site_settings').select('*'),
@@ -561,6 +561,9 @@
     if (sections.error || settings.error || theme.error || media.error) {
       console.warn('Site content: schema not available, using authored content.',
         sections.error || settings.error || theme.error || media.error);
+      /* Remember, so the next visit skips the download entirely. Expires
+         on its own, so running admin-schema.sql later still takes hold. */
+      window.supabaseSchemaMissing && window.supabaseSchemaMissing('siteContent');
       return null;
     }
 
@@ -573,21 +576,26 @@
   }
 
   async function init() {
+    /* The cache paints instantly and costs no network. */
     applyAll(readCache());
-
-    try {
-      const fresh = await fetchAll();
-      if (fresh) {
-        applyAll(fresh);
-        writeCache(fresh);
-      }
-    } catch (err) {
-      console.warn('Site content: fetch failed, using authored content.', err);
-    }
-
-    /* Layout depends on final text height, so tell app.js to
-       re-measure once. */
     window.dispatchEvent(new Event('site-content-ready'));
+
+    /* The network refresh is a background job: it must never sit in
+       front of first paint, and on a site whose copy lives in
+       index.html it usually changes nothing. */
+    const refresh = async () => {
+      try {
+        const fresh = await fetchAll();
+        if (fresh) {
+          applyAll(fresh);
+          writeCache(fresh);
+          window.dispatchEvent(new Event('site-content-ready'));
+        }
+      } catch (err) {
+        console.warn('Site content: fetch failed, using authored content.', err);
+      }
+    };
+    if (window.whenIdle) window.whenIdle(refresh); else refresh();
   }
 
   window.__siteContentReady = (document.readyState === 'loading')

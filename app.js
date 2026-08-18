@@ -25,20 +25,13 @@
 const SUPABASE_URL      = window.SUPABASE_URL;
 const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
 
-/* Null when config.js or the supabase-js CDN script failed to load —
-   loaders below fall back to static content instead of crashing.
-
-   Memoised on window because site-content.js needs a client too, and
-   two createClient() calls in one page share the same auth storage key
-   — which supabase-js warns about ("Multiple GoTrueClient instances")
-   and treats as undefined behaviour under concurrent use. Whichever
-   file gets there first builds it; the other reuses it. */
-const db = (function () {
-  if (window.__sbClient) return window.__sbClient;
-  if (!(window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)) return null;
-  window.__sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  return window.__sbClient;
-})();
+/* The client is fetched on demand — see supabase-lazy.js. It used to
+   be built at parse time, which forced a 207 KB CDN download on every
+   visit whether or not anything queried it. Callers await
+   window.loadSupabase() and handle null. */
+function getDb() {
+  return window.loadSupabase ? window.loadSupabase() : Promise.resolve(null);
+}
 
 
 /* ─────────────────────────────────────────────────────────────
@@ -685,11 +678,54 @@ function checkColumns(table, rows) {
   }
 }
 
+function renderProjects(rows) {
+  const container = document.getElementById('projectsContainer');
+  if (!container) return;
+  container.innerHTML = rows.map(buildProjectCard).join('');
+  prepareCardMotion(container);
+  updateParallax();
+  window.railRemeasure?.();
+}
+
+function renderCertificates(rows) {
+  const container = document.getElementById('certsContainer');
+  if (!container) return;
+  container.innerHTML = rows.map(buildCertCard).join('');
+  prepareCardMotion(container);
+  updateParallax();
+  window.railRemeasure?.();
+}
+
 async function loadProjects() {
   const container = document.getElementById('projectsContainer');
   if (!container) return;
 
+  /* Cache first: paints real rows with no network and without pulling
+     supabase-js at all. Only a cold or stale cache reaches out, and
+     that happens at idle so it never delays first paint. */
+  const cached = window.sbCache && window.sbCache.read('projects', 12 * 60 * 60 * 1000);
+  if (cached && cached.length) {
+    /* A fresh cache is served on its own. Revalidating here would pull
+       supabase-js on every visit and undo the whole point — the cache
+       TTL is what picks up edits instead. */
+    renderProjects(cached);
+    return;
+  }
+  return refreshProjects();
+}
+
+async function refreshProjects() {
+  const container = document.getElementById('projectsContainer');
+  if (!container) return;
+
   try {
+    /* Inside the try on purpose: `throw 0` here is how we fall through
+       to the authored fallback cards below. Outside it, the throw
+       escaped and the container was left showing "Loading…" forever. */
+    if (!window.supabaseWorthTrying || !window.supabaseWorthTrying('projects')) throw 0;
+    const db = await getDb();
+    if (!db) throw 0;
+
     const { data, error } = await db
       .from('projects')
       .select('*')
@@ -703,16 +739,12 @@ async function loadProjects() {
       return;
     }
     checkColumns('projects', data);
-    container.innerHTML = data.map(buildProjectCard).join('');
-    prepareCardMotion(container);
-    updateParallax();
-    window.railRemeasure?.();
+    window.supabaseSchemaPresent && window.supabaseSchemaPresent('projects');
+    window.sbCache && window.sbCache.write('projects', data);
+    renderProjects(data);
   } catch (err) {
-    console.warn('Projects: Supabase unreachable, showing fallback content.', err);
-    container.innerHTML = FALLBACK_PROJECTS.map(buildProjectCard).join('');
-    prepareCardMotion(container);
-    updateParallax();
-    window.railRemeasure?.();
+    if (err) console.warn('Projects: Supabase unreachable, showing fallback content.', err);
+    renderProjects(FALLBACK_PROJECTS);
   }
 }
 
@@ -803,7 +835,32 @@ async function loadCertificates() {
   const container = document.getElementById('certsContainer');
   if (!container) return;
 
+  /* Cache first: paints real rows with no network and without pulling
+     supabase-js at all. Only a cold or stale cache reaches out, and
+     that happens at idle so it never delays first paint. */
+  const cached = window.sbCache && window.sbCache.read('certificates', 12 * 60 * 60 * 1000);
+  if (cached && cached.length) {
+    /* A fresh cache is served on its own. Revalidating here would pull
+       supabase-js on every visit and undo the whole point — the cache
+       TTL is what picks up edits instead. */
+    renderCertificates(cached);
+    return;
+  }
+  return refreshCertificates();
+}
+
+async function refreshCertificates() {
+  const container = document.getElementById('certsContainer');
+  if (!container) return;
+
   try {
+    /* Inside the try on purpose: `throw 0` here is how we fall through
+       to the authored fallback cards below. Outside it, the throw
+       escaped and the container was left showing "Loading…" forever. */
+    if (!window.supabaseWorthTrying || !window.supabaseWorthTrying('certificates')) throw 0;
+    const db = await getDb();
+    if (!db) throw 0;
+
     const { data, error } = await db
       .from('certificates')
       .select('*')
@@ -817,16 +874,12 @@ async function loadCertificates() {
       return;
     }
     checkColumns('certificates', data);
-    container.innerHTML = data.map(buildCertCard).join('');
-    prepareCardMotion(container);
-    updateParallax();
-    window.railRemeasure?.();
+    window.supabaseSchemaPresent && window.supabaseSchemaPresent('certificates');
+    window.sbCache && window.sbCache.write('certificates', data);
+    renderCertificates(data);
   } catch (err) {
-    console.warn('Certificates: Supabase unreachable, showing fallback content.', err);
-    container.innerHTML = FALLBACK_CERTS.map(buildCertCard).join('');
-    prepareCardMotion(container);
-    updateParallax();
-    window.railRemeasure?.();
+    if (err) console.warn('Certificates: Supabase unreachable, showing fallback content.', err);
+    renderCertificates(FALLBACK_CERTS);
   }
 }
 
@@ -929,6 +982,8 @@ function initContactForm() {
     showStatus('', '');
 
     try {
+      const db = await getDb();
+      if (!db) throw new Error('Supabase unavailable');
       const { error } = await db
         .from('contact_submissions')
         .insert([{ name, email, phone, reason, message }]);
@@ -991,6 +1046,8 @@ function initNewsletterForm() {
        subscriber list stay private. The unique constraint on `email` is
        what detects a repeat signup — Postgres reports it as 23505. */
     try {
+      const db = await getDb();
+      if (!db) throw new Error('Supabase unavailable');
       const { error: insertErr } = await db
         .from('newsletter_subscribers')
         .insert([{ email }]);
