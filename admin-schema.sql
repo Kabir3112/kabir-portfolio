@@ -228,7 +228,7 @@ The tech obsession started with reading about Steve Jobs in middle school. Follo
 ('finiq', 'story', 'FinIQ',
  'Bengaluru, India · Jun 2023 to Jul 2025', 'FinIQ', 'Product Application Consultant',
  'From testing systems to testing what I really want.',
- 'FinIQ builds structured products platforms for banks globally.
+ 'Rewinding two years: FinIQ builds structured products platforms for banks globally, and I spent two years delivering them.
 
 - Led delivery and testing of structured products across equity, credit, and FX
 - Automated regression testing using SQL, which cut out a big chunk of manual effort
@@ -241,7 +241,7 @@ The tech obsession started with reading about Steve Jobs in middle school. Follo
 ('kings', 'story', 'Now',
  'London, UK · Sep 2025 to Sep 2026', 'What I''m Doing Now', 'MSc Management and Technological Change · King''s College London',
  'When curiosity gets serious, you move cities.',
- 'After FinIQ I wanted global perspectives, a deeper understanding of tech transformation, and a head start on an AI-driven future. New people, new cultures, new experiences: that part needed no convincing.
+ 'A year in London on the MSc, after two years building structured-products platforms in Bengaluru. I wanted global perspectives, a deeper understanding of tech transformation, and a head start on an AI-driven future. New people, new cultures, new experiences: that part needed no convincing.
 
 - Change management & leadership in tech environments
 - Design sprints & rapid prototyping
@@ -257,7 +257,7 @@ The tech obsession started with reading about Steve Jobs in middle school. Follo
 - How managers respond when expertise shifts
 - Qualitative research, stakeholder interviews, extensive literature review
 
-The interest itself started earlier, when automating regression testing at FinIQ turned curiosity into something I wanted to pursue properly. Certified in AI Fluency: Foundation & Framework (Anthropic), and exploring AI tools daily since.',
+The interest itself started at a desk in Bengaluru, where automating regression testing turned curiosity into something I wanted to pursue properly. Certified in AI Fluency: Foundation & Framework (Anthropic), and exploring AI tools daily since.',
  'cream', 40),
 
 ('personal', 'story', 'Personal',
@@ -323,7 +323,7 @@ insert into site_settings (key, value) values
   ('hero.greeting',    'Hi, I''m'),
   ('hero.name',        'Kabir Mehta.'),
   ('hero.role',        'MSc Management & Technological Change · King''s College London'),
-  ('hero.pitch',       'FinTech consultant turned AI-curious researcher. I spent two years at FinIQ delivering structured products for global banks, and I''m now researching how AI is reshaping who holds authority inside organisations.'),
+  ('hero.pitch',       'FinTech consultant turned AI-curious researcher. Two years delivering structured products for global banks, now in London researching how AI is reshaping who holds authority inside organisations. Below: where I am, and how I got here.'),
   ('hero.proof1',      '<strong>2 years</strong> FinTech delivery, Bengaluru & on-site North America'),
   ('hero.proof2',      '<strong>Equity · Credit · FX</strong> structured products'),
   ('hero.proof3',      '<strong>SQL automation</strong> that cut manual regression testing'),
