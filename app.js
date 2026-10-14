@@ -333,6 +333,7 @@ function updateHeroSequence(forceComplete = false) {
   const avatarPanelInner = document.getElementById('avatarPanelInner');
   const about = document.getElementById('intro-about');
   const aboutContent = document.getElementById('aboutPanelInner');
+  const aboutPhoto = document.getElementById('introProfile');
   const indicator = avatarPanel?.querySelector('.scroll-indicator');
   const line1 = document.getElementById('nameLine1');
   const line2 = document.getElementById('nameLine2');
@@ -361,6 +362,8 @@ function updateHeroSequence(forceComplete = false) {
 
   aboutContent?.style.setProperty('--about-shift-y', `${lerp(52, 0, aboutProgress).toFixed(2)}px`);
   aboutContent?.style.setProperty('--about-opacity', clamp(0.1 + aboutProgress * 0.9).toFixed(3));
+  aboutPhoto?.style.setProperty('--about-shift-y', `${lerp(52, 0, aboutProgress).toFixed(2)}px`);
+  aboutPhoto?.style.setProperty('--about-opacity', clamp(0.1 + aboutProgress * 0.9).toFixed(3));
 
   line1?.classList.toggle('visible', aboutProgress > 0.08);
   line2?.classList.toggle('visible', aboutProgress > 0.18);

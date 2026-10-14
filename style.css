@@ -800,6 +800,24 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   max-width: 100%;
 }
 
+/* About portrait — right column on desktop. Reveals with the same
+   scroll-driven vars as .about-content (set on #introProfile in JS). */
+.about-photo {
+  width: clamp(280px, 42%, 560px);
+  flex-shrink: 0;
+  overflow: hidden;
+  opacity: var(--about-opacity, 0);
+  transform: translate3d(0, var(--about-shift-y, 52px), 0);
+  transition: opacity 0.2s linear, transform 0.2s linear;
+}
+.about-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
 .intro-greeting {
   font-family: var(--font-sans);
   font-size: clamp(0.75rem, 1.2vw, 0.9rem);
@@ -1592,6 +1610,14 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
     justify-content: flex-start;
     padding-top: max(5vh, 3.5rem);
     max-width: 100%;
+  }
+
+  /* Portrait sits below the intro text, full width */
+  .about-photo {
+    width: 100%;
+    height: 38vh;
+    flex-shrink: 0;
+    transform: none;
   }
 
   /* Compact name on mobile */
